@@ -1,5 +1,5 @@
 const extractJsonFromResponse = require("../../Utils/extractJSONContent");
-const analysisQueryFromAi = require("../../Utils/openai");
+const openAIFunctions = require("../../Utils/openai");
 const orderDao = require("../../../database/orderDAO");
 
 const QueryController = {
@@ -9,7 +9,8 @@ const QueryController = {
       const { query } = req.body;
       const { id: userId } = req.user
 
-      const content = await analysisQueryFromAi(query)
+      const content = await openAIFunctions.analysisQueryFromAi(query);
+      console.log("content:", content)
       const extracted = extractJsonFromResponse(content)
 
       const params = {

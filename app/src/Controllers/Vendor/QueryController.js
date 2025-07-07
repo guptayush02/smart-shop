@@ -1,5 +1,6 @@
 const orderDAO = require("../../../database/orderDAO");
 const vendorResponseDao = require("../../../database/vendorResponseDAO");
+const openAIFunctions = require("../../Utils/openai");
 
 const QueryController = {
 
@@ -11,6 +12,8 @@ const QueryController = {
         // TODO: Fetch all the open order from db based on the vendor catrgory
         // Add vendorID check where vendorId is loggedin vendor
         const orders = await orderDAO.findAll({ category, orderStatus });
+        // const prompt = await openAIFunctions.analysisObjectFromAi(orders);
+        // console.log("prompt:", prompt)
         return res.status(200).send({status: 200, data: orders})
       }
       return res.status(404).send({ status: 404, message: "Insufficient permissions" })

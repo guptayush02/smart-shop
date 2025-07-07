@@ -16,9 +16,23 @@ app.use(express.urlencoded({ extended: true }));
 const hostname = "127.0.0.1";
 const port = 3000;
 
+const allowedOrigins = [
+  'http://localhost:8081',
+  'http://localhost:8082'
+];
+
 app.use(cors({
-  origin: 'http://localhost:8081',
-  credentials: true, // only if you're using cookies
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
 
 app.use("/api/v1/auth", authRoutes);

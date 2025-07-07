@@ -20,7 +20,9 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const getQuery = async() => {
-      const response:any = await httpRequest.get('api/v1/user/get-pending-queries');
+      const category = 'furniture';
+      const orderStatus = 'pending'
+      const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
       if (response.data.status === 200) {
         setPreviousQuery(response.data.data);
       }
@@ -30,6 +32,7 @@ export default function HomeScreen() {
     } else {
       setPreviousQuery([])
     }
+    console.log("get product api for vendor")
   }, [isLogin]);
 
   const handleSend = async () => {
@@ -37,13 +40,14 @@ export default function HomeScreen() {
     if (!token) {
       setShowLoginModal(true);
     } else {
-      if (message) {
-        const response:any = await httpRequest.post('api/v1/user/send-query', { query: message });
-        if (response.data.status === 200) {
-          setPreviousQuery(response.data.data);
-          setMessage('');
-        }
-      }
+      console.log("vendor response on product")
+      // if (message) {
+      //   const response:any = await httpRequest.post('api/v1/user/send-query', { query: message });
+      //   if (response.data.status === 200) {
+      //     setPreviousQuery(response.data.data);
+      //     setMessage('');
+      //   }
+      // }
     }
   };
 
