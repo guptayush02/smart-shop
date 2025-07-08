@@ -58,6 +58,10 @@ export default function HomeScreen() {
       return newSet;
     });
   };
+
+  const buyNow = () => {
+    console.log("Buy now")
+  }
   
 
   return (
@@ -83,7 +87,7 @@ export default function HomeScreen() {
                         <ThemedText style={{ color: 'red' }} >Not a valid product</ThemedText>
                       ) : ''
                     }
-                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? 'View Less' : 'View Product'}</TouchableOpacity>
+                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? <ThemedText style={{ color: 'black' }}>View Less</ThemedText> : <ThemedText style={{ color: 'black' }}>View Product</ThemedText>}</TouchableOpacity>
                     {
                       openVendorIndices.has(i) && (
                         _?.VendorResponses.map((availableProduct:any, index:number) => (
@@ -91,6 +95,7 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>No: {index + 1}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Price: {availableProduct.price}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
+                            <Button style={styles.buyButton} title="Buy Now" onPress={buyNow} />
                           </View>
                         ))
                       )
@@ -204,6 +209,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     // ✅ Shadow for Android
     elevation: 4,
-  },
+  }
 })
 

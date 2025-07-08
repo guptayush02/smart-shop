@@ -88,7 +88,7 @@ export default function HomeScreen() {
                       ) : ''
                     }
 
-                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? 'View Less' : 'View More'}</TouchableOpacity>
+                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? <ThemedText style={{ color: 'black' }}>View Less</ThemedText> : <ThemedText style={{ color: 'black' }}>View More</ThemedText>}</TouchableOpacity>
                     {
                       openVendorIndices.has(i) && (
                         _?.VendorResponses.map((availableProduct:any, index:number) => (
