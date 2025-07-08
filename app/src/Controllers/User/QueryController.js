@@ -9,8 +9,8 @@ const QueryController = {
       const { query } = req.body;
       const { id: userId } = req.user
 
-      const content = await openAIFunctions.analysisQueryFromAi(query);
-      console.log("content:", content)
+      const prompt = 'You are a helpful assistant that extracts purchase requests in structured JSON format also tell us in which vendor category that product fall, also please make the response and the key same one key should be product and another key will be catrgory also let me know the quantity user wants.';
+      const content = await openAIFunctions.analysisQueryFromAi(query, prompt);
       const extracted = extractJsonFromResponse(content)
 
       const params = {

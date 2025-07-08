@@ -1,6 +1,7 @@
 const orderDAO = require("../../../database/orderDAO");
 const vendorResponseDao = require("../../../database/vendorResponseDAO");
 const openAIFunctions = require("../../Utils/openai");
+const extractJsonFromResponse = require("../../Utils/extractJSONContent");
 
 const QueryController = {
 
@@ -25,13 +26,22 @@ const QueryController = {
 
   async vendorResponseOnQuery(req, res) {
     try {
-      const { orderId, deliverable_quantity, price } = req.body;
+      const { query, orderId } = req.body;
+      const prompt = 'You are a helpful assistant that extracts order fulfilment details in structured JSON format also tell us about the deliverable_quantity and price of the product vendor is salling, also every time please return a single object I dont want nested object also I want price and currency in different key'
+      const content = await openAIFunctions.analysisQueryFromAi(query, prompt);
+      const extracted = extractJsonFromResponse(content);
+      if (!extracted.deliverable_quantity || !extracted.price) {
+        return res.status(404).send({status: 404, message: 'Price or deliverable quantity is missing'});
+      }
+
+      const { deliverable_quantity, price } = extracted;
       const { id: vendorId, role } = req.user;
 
       if (role === 'vendor') {
         // Step 2: Notify user about the query
-        const response = await vendorResponseDao.create({ orderId, deliverable_quantity, price, vendorId });
-        return res.status(200).send({ status: 200, message: "Vendor Response successfully", data: response })
+        await vendorResponseDao.create({ orderId, deliverable_quantity, price, vendorId });
+        const orders = await orderDAO.findAll({ category: 'apparel', orderStatus: 'pending' });
+        return res.status(200).send({ status: 200, message: "Vendor Response successfully", data: orders })
       }
       return res.status(404).send({ status: 404, message: "Insufficient permissions" })
     } catch (error) {

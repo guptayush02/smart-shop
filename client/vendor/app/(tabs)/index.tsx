@@ -13,14 +13,15 @@ const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
   const [isLogin, setIsLogin] = useState(false);
-  const [message, setMessage] = useState('');
+  // const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [previousQuery, setPreviousQuery] = useState([]);
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const getQuery = async() => {
-      const category = 'furniture';
+      const category = 'apparel';
       const orderStatus = 'pending'
       const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
       if (response.data.status === 200) {
@@ -32,22 +33,21 @@ export default function HomeScreen() {
     } else {
       setPreviousQuery([])
     }
-    console.log("get product api for vendor")
   }, [isLogin]);
 
-  const handleSend = async () => {
+  const handleSend = async (orderId: number) => {
     const token = await getToken('token');
+    const message = messages[orderId];
     if (!token) {
       setShowLoginModal(true);
     } else {
-      console.log("vendor response on product")
-      // if (message) {
-      //   const response:any = await httpRequest.post('api/v1/user/send-query', { query: message });
-      //   if (response.data.status === 200) {
-      //     setPreviousQuery(response.data.data);
-      //     setMessage('');
-      //   }
-      // }
+      if (messages) {
+        const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId });
+        if (response.data.status === 200) {
+          setPreviousQuery(response.data.data);
+          setMessages(prev => ({ ...prev, [orderId]: '' }));
+        }
+      }
     }
   };
 
@@ -78,7 +78,7 @@ export default function HomeScreen() {
                 previousQuery.map((_:any, i) => (
                   <View key={i} style={styles.card}>
                     <ThemedText style={{ color: 'black' }} >No: {i + 1}</ThemedText>
-                    <ThemedText style={{ color: 'black' }} >Product you ordered: {_.product}</ThemedText>
+                    <ThemedText style={{ color: 'black' }} >Customer wants: {_.product}</ThemedText>
                     <ThemedText style={{ color: 'black' }} >Category: {_.category}</ThemedText>
                     <ThemedText style={{ color: 'black' }} >Quantity: {_.quantity}</ThemedText>
                     <ThemedText style={{ color: 'black' }} >Status: {_.orderStatus}</ThemedText>
@@ -87,7 +87,8 @@ export default function HomeScreen() {
                         <ThemedText style={{ color: 'red' }} >Not a valid product</ThemedText>
                       ) : ''
                     }
-                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? 'View Less' : 'View Product'}</TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? 'View Less' : 'View More'}</TouchableOpacity>
                     {
                       openVendorIndices.has(i) && (
                         _?.VendorResponses.map((availableProduct:any, index:number) => (
@@ -99,13 +100,26 @@ export default function HomeScreen() {
                         ))
                       )
                     }
+                    <ThemedView style={styles.inputContainer}>
+                      <TextInput
+                        style={styles.textInput}
+                        placeholder="Want to buy anything..."
+                        value={messages[_?.id] || ''}
+                        onChangeText={(text:any) => setMessages(prev => ({ ...prev, [_?.id]: text }))}
+                        onSubmitEditing={() => handleSend(_?.id)}
+                        returnKeyType="send"
+                      />
+                      <TouchableOpacity onPress={() => handleSend(_?.id)} style={styles.sendButton}>
+                        <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
+                      </TouchableOpacity>
+                    </ThemedView>
                   </View>
                 ))
               }
             </ScrollView>
           </ThemedView>
 
-          <ThemedView style={styles.inputContainer}>
+          {/* <ThemedView style={styles.inputContainer}>
             <TextInput
               style={styles.textInput}
               placeholder="Want to buy anything..."
@@ -117,7 +131,7 @@ export default function HomeScreen() {
             <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
               <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
             </TouchableOpacity>
-          </ThemedView>
+          </ThemedView> */}
         </ThemedView>
       </ParallaxScrollView>
     </>
