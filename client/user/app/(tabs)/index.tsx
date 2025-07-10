@@ -87,7 +87,7 @@ export default function HomeScreen() {
           <ThemedView style={[styles.previousQueryContainer, { height: screenHeight * 0.7 }]}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {
-                previousQuery.map((_:any, i) => (
+                previousQuery?.map((_:any, i) => (
                   <View key={i} style={styles.card}>
                     <ThemedText style={{ color: 'black' }} >No: {i + 1}</ThemedText>
                     <ThemedText style={{ color: 'black' }} >Product you ordered: {_.product}</ThemedText>
@@ -107,6 +107,7 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>No: {index + 1}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Price: {availableProduct.price}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payment?.paymentStatus}</ThemedText>
                             <Button style={styles.buyButton} title="Buy Now" onPress={() => buyNow(availableProduct?.id)} />
                           </View>
                         ))

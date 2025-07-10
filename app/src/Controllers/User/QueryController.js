@@ -20,7 +20,7 @@ const QueryController = {
         quantity: extracted.quantity || 0
       }
       await orderDao.create(params)
-      const allOrder = await orderDao.findAll({ userId, orderStatus: 'pending' })
+      const allOrder = await orderDao.findAll({ userId })
       const jsonData = allOrder.map(order => order.toJSON());
       // TODO Notify all nearest vendor via push notification.
       return res.status(200).send({status: 200, data: jsonData})
@@ -34,7 +34,7 @@ const QueryController = {
     try {
       const { id: userId } = req.user;
 
-      let order = await orderDao.findAll({ userId, orderStatus: 'pending' });
+      let order = await orderDao.findAll({ userId });
       order = order.map(order => order.toJSON());
       return res.status(200).send({ status: 200, data: order });
     } catch (error) {

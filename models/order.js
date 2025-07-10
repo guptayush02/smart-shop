@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
   Order.associate = (models) => {
     Order.belongsTo(models.User, { foreignKey: 'userId' });
     Order.hasMany(models.VendorResponse, { foreignKey: 'orderId' });
+    // Order.hasMany(models.Order, { foreignKey: 'orderId' });
   };
 
   return Order;

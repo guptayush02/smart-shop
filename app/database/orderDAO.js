@@ -1,4 +1,4 @@
-const { Order, VendorResponse, User } = require("../../models");
+const { Order, VendorResponse, User, Payments } = require("../../models");
 
 const orderDao = {
   async create(params) {
@@ -15,6 +15,9 @@ const orderDao = {
             {
               model: User,
               as: 'vendor',
+            },
+            {
+              model: Payments
             }
           ]
         },

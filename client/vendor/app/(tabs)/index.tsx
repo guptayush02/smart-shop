@@ -75,7 +75,7 @@ export default function HomeScreen() {
           <ThemedView style={[styles.previousQueryContainer, { height: screenHeight * 0.7 }]}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {
-                previousQuery.map((_:any, i) => (
+                previousQuery?.map((_:any, i) => (
                   <View key={i} style={styles.card}>
                     <ThemedText style={{ color: 'black' }} >No: {i + 1}</ThemedText>
                     <ThemedText style={{ color: 'black' }} >Customer wants: {_.product}</ThemedText>

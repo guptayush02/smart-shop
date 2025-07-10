@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
   VendorResponse.associate = (models) => {
     VendorResponse.belongsTo(models.User, { foreignKey: 'vendorId', as: 'vendor' });
     VendorResponse.belongsTo(models.Order, { foreignKey: 'orderId' });
+    VendorResponse.hasOne(models.Payments, { foreignKey: 'vendorResponseId' });
   };
 
   return VendorResponse;
