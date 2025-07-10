@@ -21,6 +21,10 @@ const orderDao = {
         { model: User }
       ]
     });
+  },
+
+  async update(payload, where) {
+    return await Order.update(payload, { where: where });
   }
 }
 

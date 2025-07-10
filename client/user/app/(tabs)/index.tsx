@@ -59,8 +59,20 @@ export default function HomeScreen() {
     });
   };
 
-  const buyNow = () => {
+  const buyNow = async(id: number) => {
     console.log("Buy now")
+    const token = await getToken('token');
+    if (!token) {
+      setShowLoginModal(true);
+    } else {
+      if (id) {
+        const response:any = await httpRequest.post('api/v1/user/order-place', { vendorResponseId: id, orderStatus: "processing" });
+        if (response.data.status === 200) {
+          setPreviousQuery(response.data.data);
+          setMessage('');
+        }
+      }
+    }
   }
   
 
@@ -95,7 +107,7 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>No: {index + 1}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Price: {availableProduct.price}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
-                            <Button style={styles.buyButton} title="Buy Now" onPress={buyNow} />
+                            <Button style={styles.buyButton} title="Buy Now" onPress={() => buyNow(availableProduct?.id)} />
                           </View>
                         ))
                       )
