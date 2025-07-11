@@ -4,6 +4,7 @@ const router = express.Router();
 
 const QueryController = require("../Controllers/User/QueryController");
 const OrderController = require("../Controllers/Order/OrderController");
+const UserController = require("../Controllers/User/UserController");
 
 // 1
 router.post("/send-query", middleware.authenticate, QueryController.userQuery);
@@ -13,5 +14,9 @@ router.get("/get-pending-queries", middleware.authenticate, QueryController.getP
 
 // 5
 router.post("/order-place", middleware.authenticate, OrderController.placeOrder);
+
+router.get("/profile", middleware.authenticate, UserController.getProfile);
+
+router.post("/add-address", middleware.authenticate, UserController.saveAddress);
 
 module.exports = router

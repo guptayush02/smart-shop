@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -9,6 +9,7 @@ import { getToken } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
+import { useFocusEffect } from '@react-navigation/native';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -20,19 +21,18 @@ export default function HomeScreen() {
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
 
-  useEffect(() => {
-    const getQuery = async() => {
-      const response:any = await httpRequest.get('api/v1/user/get-pending-queries');
-      if (response.data.status === 200) {
-        setPreviousQuery(response.data.data);
+  useFocusEffect(
+    useCallback(() => {
+      const getQuery = async() => {
+        const response:any = await httpRequest.get('api/v1/user/get-pending-queries');
+        if (response.data.status === 200) {
+          setPreviousQuery(response.data.data);
+        }
       }
-    }
-    if (isLogin) {
+
       getQuery()
-    } else {
-      setPreviousQuery([])
-    }
-  }, [isLogin]);
+    }, [isLogin])
+  )
 
   const handleSend = async () => {
     const token = await getToken('token');
@@ -62,7 +62,6 @@ export default function HomeScreen() {
   };
 
   const buyNow = async(id: number) => {
-    console.log("Buy now")
     const token = await getToken('token');
     if (!token) {
       setShowLoginModal(true);
