@@ -4,41 +4,45 @@ import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView
 import httpRequest from '@/helpers/httpRequests';
 import { ThemedText } from './ThemedText';
 
-export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogin, openSignupModal }:any) {
+export default function SignupForm({ showSignupModal, setShowSignupModal, setIsLogin, openLoginModal }:any) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
 
-  const login = async() => {
-    if (!email || !password) {
+  const signup = async() => {
+    if (!email || !password || !name || !address) {
       return;
     }
-    const response:any = await httpRequest.post('api/v1/auth/login', { email, password });
+    const response:any = await httpRequest.post('api/v1/auth/create-account', { email, password, name, address, role: 'vendor' });
     if (response.data.status === 200) {
-      const { data } = response.data;
-      saveToken('token', data.token)
+      const { message } = response.data;
+      console.log("message:", message)
     }
-    setShowLoginModal(false)
-    setIsLogin(true)
+    setShowSignupModal(false);
+    openLoginModal();
   }
 
   return (
     <>
       <Modal
-        visible={showLoginModal}
+        visible={showSignupModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowLoginModal(false)}
+        onRequestClose={() => setShowSignupModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Login Required</Text>
+            <Text style={styles.modalTitle}>Signup</Text>
 
+            <TextInput placeholder="Name" style={styles.input} value={name} onChangeText={setName} />
             <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
             <TextInput placeholder="Password" secureTextEntry style={styles.input} value={password} onChangeText={setPassword} />
-            <Button title="Login" onPress={login} />
-            <Button title="Cancel" color="red" onPress={() => setShowLoginModal(false)} />
-            <ThemedText style={{ color: 'black' }}>Dont have account <TouchableOpacity onPress={openSignupModal}>Click here</TouchableOpacity></ThemedText>
+            <TextInput placeholder="Address" style={styles.input} value={address} onChangeText={setAddress} />
+            <Button title="Signup" onPress={signup} />
+            <Button title="Cancel" color="red" onPress={() => setShowSignupModal(false)} />
+            <ThemedText style={{ color: 'black' }}>Already have account <TouchableOpacity onPress={openLoginModal}>Click here</TouchableOpacity></ThemedText>
           </View>
         </View>
       </Modal>

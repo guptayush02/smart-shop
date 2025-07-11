@@ -3,11 +3,13 @@ import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { getToken, removeToken } from '@/helpers/expoSecureStore';
 import LoginForm from './LoginForm';
+import SignupForm from './SignupForm';
 
 export function Headers({ isLogin, setIsLogin }:any) {
 
   
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   useEffect(() => {
     const checkToken = async() => {
@@ -32,9 +34,22 @@ export function Headers({ isLogin, setIsLogin }:any) {
     }
   }
 
+  const openSignupModal = () => {
+    setShowSignupModal(true);
+    setShowLoginModal(false);
+  }
+
+  const openLoginModal = () => {
+    setShowSignupModal(false);
+    setShowLoginModal(true);
+  }
+
+  
+
   return (
     <View style={styles.header}>
-      <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin}/>
+      <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} openSignupModal={openSignupModal} />
+      <SignupForm showSignupModal={showSignupModal} setShowSignupModal={setShowSignupModal} setIsLogin={setIsLogin} openLoginModal={openLoginModal} />
       <View>
         <ThemedText>smartshop.ai</ThemedText>
       </View>

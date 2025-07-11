@@ -2,8 +2,9 @@ import { saveToken } from '@/helpers/expoSecureStore';
 import React, { useState } from 'react';
 import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import httpRequest from '@/helpers/httpRequests';
+import { ThemedText } from './ThemedText';
 
-export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogin }:any) {
+export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogin, openSignupModal }:any) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +38,7 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
             <TextInput placeholder="Password" secureTextEntry style={styles.input} value={password} onChangeText={setPassword} />
             <Button title="Login" onPress={login} />
             <Button title="Cancel" color="red" onPress={() => setShowLoginModal(false)} />
+            <ThemedText style={{ color: 'black' }}>Dont have account <TouchableOpacity onPress={openSignupModal}>Click here</TouchableOpacity></ThemedText>
           </View>
         </View>
       </Modal>

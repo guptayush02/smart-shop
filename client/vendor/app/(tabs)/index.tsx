@@ -8,16 +8,17 @@ import { Headers } from '@/components/Headers';
 import { getToken } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
+import SignupForm from '@/components/SignupForm';
 
 const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
   const [isLogin, setIsLogin] = useState(false);
-  // const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [previousQuery, setPreviousQuery] = useState([]);
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   useEffect(() => {
     const getQuery = async() => {
@@ -62,11 +63,22 @@ export default function HomeScreen() {
       return newSet;
     });
   };
+
+  const openSignupModal = () => {
+    setShowSignupModal(true);
+    setShowLoginModal(false);
+  }
+
+  const openLoginModal = () => {
+    setShowSignupModal(false);
+    setShowLoginModal(true);
+  }
   
 
   return (
     <>
-      <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} />
+      <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} openSignupModal={openSignupModal} />
+      <SignupForm showSignupModal={showSignupModal} setShowSignupModal={setShowSignupModal} setIsLogin={setIsLogin} openLoginModal={openLoginModal} />
       <ParallaxScrollView
         headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={<Headers isLogin={isLogin} setIsLogin={setIsLogin} />}

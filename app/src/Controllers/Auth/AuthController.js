@@ -1,5 +1,5 @@
 const userDao = require("../../../database/userDAO");
-const prodileDao = require("../../../database/profileDAO");
+const profileDao = require("../../../database/profileDAO");
 const bcryptjsScript = require("../../Utils/bcryptjs");
 const jsonWebToken = require("../../Utils/jsonWebToken");
 
@@ -28,7 +28,7 @@ const AuthController = {
     }
   },
 
-  async signup(req, res) {
+  async createAccount(req, res) {
     try {
       const { name, email, password, role, lat, long, address } = req.body;
 
@@ -43,8 +43,8 @@ const AuthController = {
 
       if (role != 'admin') {
         const payload = { userId: user.id, lat, long, address };
-        await prodileDao.create(payload);
-        createdUser = await prodileDao.findAll({ userId: user.id });
+        await profileDao.create(payload);
+        createdUser = await profileDao.findAll({ userId: user.id });
       }
 
       return res.status(200).send({status: 200, message: "Profile create successfully"});
