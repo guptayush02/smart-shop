@@ -40,7 +40,7 @@ const QueryController = {
       if (role === 'vendor') {
         // Step 2: Notify user about the query
         await vendorResponseDao.create({ orderId, deliverable_quantity, price, vendorId });
-        const orders = await orderDAO.findAll({ category: 'apparel', orderStatus: 'pending' });
+        const orders = await orderDAO.findAll({ category: 'clothing', orderStatus: 'pending' });
         return res.status(200).send({ status: 200, message: "Vendor Response successfully", data: orders })
       }
       return res.status(404).send({ status: 404, message: "Insufficient permissions" })

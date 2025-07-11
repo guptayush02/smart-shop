@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const getQuery = async() => {
-      const category = 'apparel';
+      const category = 'clothing';
       const orderStatus = 'pending'
       const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
       if (response.data.status === 200) {

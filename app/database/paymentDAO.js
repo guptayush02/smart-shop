@@ -6,7 +6,7 @@ const paymentDao = {
   },
 
   async findOne(where) {
-    return await Payments.findOne(where);
+    return await Payments.findOne({ where });
   },
 
   async update(payload, where) {
