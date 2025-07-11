@@ -17,7 +17,7 @@ const UserController = {
       const { user } = req;
       const { houseNumber, area, city, pinCode } = req.body;
       await profileDao.create({ userId: user.id, address: `${houseNumber}, ${area} ${city} ${pinCode}` });
-      res.status(200).send({ status: 200, message: 'Address saved successfully' })
+      return res.status(200).send({ status: 200, message: 'Address saved successfully' })
     } catch (error) {
       console.log("error in user saveAddress function:", error)
       return res.status(400).send({ status: 400, error: `Error in user saveAddress function: ${error}` })
