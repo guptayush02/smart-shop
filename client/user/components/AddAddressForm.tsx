@@ -32,7 +32,7 @@ export default function AddAddressForm({ isAddressModalOpen, setIsAddressModalOp
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Add Address:</Text>
+            <Text style={styles.modalTitle}>Add Address</Text>
 
             <TextInput placeholder="Flat/House no" style={styles.input} value={houseNumber} onChangeText={setHouseNumber} />
             <TextInput placeholder="Area" style={styles.input} value={area} onChangeText={setArea} />

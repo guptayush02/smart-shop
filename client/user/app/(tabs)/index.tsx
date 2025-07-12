@@ -10,6 +10,9 @@ import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
 import { useFocusEffect } from '@react-navigation/native';
+import Addresses from '@/components/Addresses';
+import CustomModal from '@/components/CustomModal';
+import AddAddressForm from '@/components/AddAddressForm';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -20,6 +23,9 @@ export default function HomeScreen() {
   const [previousQuery, setPreviousQuery] = useState([]);
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<any>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -62,6 +68,8 @@ export default function HomeScreen() {
   };
 
   const buyNow = async(id: number) => {
+    setIsModalOpen(true);
+    return;
     const token = await getToken('token');
     if (!token) {
       setShowLoginModal(true);
@@ -86,8 +94,29 @@ export default function HomeScreen() {
     setShowLoginModal(true);
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileData();
+    }, [isLogin])
+  );
+
+  const fetchProfileData = async () => {
+    if (isLogin) {
+      const response: any = await httpRequest.get('api/v1/user/profile');
+      if (response.data.status === 200) {
+        setUser(response.data.data);
+      }
+    }
+  };
+
   return (
     <>
+      <CustomModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} >
+        <View style={{width: '60%', marginTop: '20%', alignSelf: 'center'}}>
+          <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} textColor={'black'} themeColor={'white'} />
+        </View>
+        <AddAddressForm isAddressModalOpen={isAddressModalOpen} setIsAddressModalOpen={setIsAddressModalOpen} fetchProfileData={fetchProfileData} />
+      </CustomModal>
       <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} openSignupModal={openSignupModal} />
       <SignupForm showSignupModal={showSignupModal} setShowSignupModal={setShowSignupModal} setIsLogin={setIsLogin} openLoginModal={openLoginModal} />
       <ParallaxScrollView

@@ -11,6 +11,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Headers } from '@/components/Headers';
 import httpRequest from '@/helpers/httpRequests';
 import AddAddressForm from '@/components/AddAddressForm';
+import Addresses from '@/components/Addresses';
 
 export default function TabTwoScreen() {
   const [isLogin, setIsLogin] = useState(false);
@@ -49,19 +50,7 @@ export default function TabTwoScreen() {
                 <ThemedText>{user?.name}</ThemedText>
                 <ThemedText>{user?.email}</ThemedText>
               </View>
-              <View>
-                <ThemedView style={styles.titleContainer}>
-                  <ThemedText type="title">Addresses:</ThemedText>
-                </ThemedView>
-                <TouchableOpacity onPress={() => setIsAddressModalOpen(prev => !prev)}><ThemedText>+ Add another address</ThemedText></TouchableOpacity>
-                {
-                  user?.Profiles?.map((profile: any, ind:number) => (
-                    <ThemedView key={ind}>
-                      <ThemedText>{profile?.address}</ThemedText>
-                    </ThemedView>
-                  ))
-                }
-              </View>
+              <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} />
             </ThemedView>
           ) : (
             <ThemedText>You are not login</ThemedText>

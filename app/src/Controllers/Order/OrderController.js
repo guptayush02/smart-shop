@@ -18,7 +18,7 @@ const OrderController = {
       
       const updateData = { orderStatus };
       const where = { id: orderId };
-      await orderDAO.update(updateData, where );
+      await orderDAO.update(updateData, where);
       
       let existingPayment = await paymentDAO.findOne({ vendorResponseId: vendorResponse.id });
       if (existingPayment) {
