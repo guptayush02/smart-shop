@@ -7,6 +7,20 @@ module.exports = (sequelize, DataTypes) => {
     vendorId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
     paymentStatus: DataTypes.STRING,
+    userProfileId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Profiles',
+        key: 'id',
+      },
+    },
+    vendorProfileId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Profiles',
+        key: 'id',
+      },
+    }
   }, {
     tableName: 'Payments'
   });
@@ -16,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     Payments.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
     Payments.belongsTo(models.Order, { foreignKey: 'orderId' });
     Payments.belongsTo(models.VendorResponse, { foreignKey: 'vendorResponseId' });
+    Payments.belongsTo(models.Profile, { foreignKey: 'userProfileId', as: 'userProfile' });
+    Payments.belongsTo(models.Profile, { foreignKey: 'vendorProfileId', as: 'vendorProfile' });
   };
 
   return Payments;

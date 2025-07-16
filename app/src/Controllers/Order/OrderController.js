@@ -1,6 +1,7 @@
 const vendorResponseDao = require("../../../database/vendorResponseDAO");
 const orderDAO = require("../../../database/orderDAO");
 const paymentDAO = require("../../../database/paymentDAO");
+const profileDAO = require("../../../database/profileDAO");
 
 const OrderController = {
   
@@ -19,6 +20,13 @@ const OrderController = {
       const updateData = { orderStatus };
       const where = { id: orderId };
       await orderDAO.update(updateData, where);
+
+      let [ defaultAddress, vendorProfile ] = await Promise.all([profileDAO.findOne({ defaultAddress: true, userId }), profileDAO.findOne({ defaultAddress: true, userId: vendorId })]);
+      if (!defaultAddress) {
+        return res.status(404).send({ status: 404, message: 'Please select a default address' });
+      }
+      defaultAddress = defaultAddress.toJSON();
+      vendorProfile = vendorProfile ? vendorProfile.toJSON() : {};
       
       let existingPayment = await paymentDAO.findOne({ vendorResponseId: vendorResponse.id });
       if (existingPayment) {
@@ -26,7 +34,9 @@ const OrderController = {
         const updatePayload = {
           paymentStatus: 'complete',
           price,
-          currency: 'INR'
+          currency: 'INR',
+          userProfileId: defaultAddress?.id,
+          vendorProfileId: vendorProfile?.id || null
         }
         const where = { userId, vendorResponseId, vendorId, orderId }
         await paymentDAO.update(updatePayload, where)
@@ -38,7 +48,9 @@ const OrderController = {
           orderId,
           vendorId,
           vendorResponseId,
-          paymentStatus: 'processing'
+          paymentStatus: 'processing',
+          profileId: defaultAddress?.id,
+          vendorProfileId: vendorProfile?.id || null
         }
         await paymentDAO.create(paymentParams);
       }

@@ -37,7 +37,9 @@ export default function HomeScreen() {
         }
       }
 
-      getQuery()
+      if (isLogin) {
+        getQuery()
+      }
     }, [isLogin])
   )
 
@@ -160,9 +162,9 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payment?.paymentStatus}</ThemedText>
                             {
-                              _.orderStatus === 'pending' && (
+                              // _.orderStatus === 'pending' && (
                                 <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct?.id)} />
-                              )
+                              // )
                             }
                           </View>
                         ))

@@ -42,7 +42,7 @@ const AuthController = {
       let user = createdUser.toJSON();
 
       if (role != 'admin') {
-        const payload = { userId: user.id, lat, long, address };
+        const payload = { userId: user.id, lat, long, address, defaultAddress: true };
         await profileDao.create(payload);
         createdUser = await profileDao.findAll({ userId: user.id });
       }

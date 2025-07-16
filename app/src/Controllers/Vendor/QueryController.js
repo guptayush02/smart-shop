@@ -12,7 +12,7 @@ const QueryController = {
       if (role === 'vendor') {
         // TODO: Fetch all the open order from db based on the vendor catrgory
         // Add vendorID check where vendorId is loggedin vendor
-        const orders = await orderDAO.findAll({ category, orderStatus });
+        const orders = await orderDAO.findAll({ category }); //orderStatus
         // const prompt = await openAIFunctions.analysisObjectFromAi(orders);
         // console.log("prompt:", prompt)
         return res.status(200).send({status: 200, data: orders})
