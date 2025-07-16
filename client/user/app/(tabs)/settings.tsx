@@ -50,7 +50,7 @@ export default function TabTwoScreen() {
                 <ThemedText>{user?.name}</ThemedText>
                 <ThemedText>{user?.email}</ThemedText>
               </View>
-              <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} />
+              <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} />
             </ThemedView>
           ) : (
             <ThemedText>You are not login</ThemedText>

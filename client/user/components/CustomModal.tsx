@@ -16,7 +16,7 @@ export default function CustomModal({ isModalOpen, setIsModalOpen, children }:an
       >
        {children}
        <View style={{width: '20%', alignSelf: 'center'}}>
-       <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} />
+       {/* <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} /> */}
        </View>
       </Modal>
     </>

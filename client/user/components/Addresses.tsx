@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, Text, CheckBox } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -12,7 +12,14 @@ import { Headers } from '@/components/Headers';
 import httpRequest from '@/helpers/httpRequests';
 import AddAddressForm from '@/components/AddAddressForm';
 
-export default function Addresses({ setIsAddressModalOpen, user, textColor = 'white', themeColor = 'transparent' }:any) {
+export default function Addresses({ setIsAddressModalOpen, user, fetchProfileData, textColor = 'white', themeColor = 'transparent' }:any) {
+
+  const onChangeDefaultAddress = async(event:any, userProfile:any) => {
+    const response:any = await httpRequest.put(`api/v1/user/profile/${userProfile?.id}`, { defaultAddress: event });
+    if (response?.status === 200) {
+      fetchProfileData()
+    }
+  }
 
   return (
     <View style={{backgroundColor: themeColor}}>
@@ -22,7 +29,12 @@ export default function Addresses({ setIsAddressModalOpen, user, textColor = 'wh
       <TouchableOpacity onPress={() => setIsAddressModalOpen((prev:any) => !prev)}><ThemedText style={{color: textColor}}>+ Add another address</ThemedText></TouchableOpacity>
       {
         user?.Profiles?.map((profile: any, ind:number) => (
-          <View key={ind}>
+          <View key={ind} style={styles.addresses}>
+            <CheckBox
+              value={profile.defaultAddress}
+              onValueChange={(event:any) => onChangeDefaultAddress(event, profile)}
+              style={styles.checkbox}
+            />
             <ThemedText style={{color: textColor}}>{profile?.address}</ThemedText>
           </View>
         ))
@@ -45,5 +57,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     display: 'flex',
     gap: 30
+  },
+  addresses: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 20,
+    alignItems: 'center'
   }
 });

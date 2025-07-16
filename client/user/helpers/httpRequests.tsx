@@ -18,6 +18,12 @@ const httpRequest = {
     const token = await getToken('token');
     const headers = { token, 'Content-Type': 'application/json' };
     return await axios.get(`${baseUrl}${route}`, { headers });
+  },
+
+  put: async(route: string, body: {}) => {
+    const token = await getToken('token');
+    const headers = { token, 'Content-Type': 'application/json' };
+    return await axios.put(`${baseUrl}${route}`, body, { headers });
   }
 }
 

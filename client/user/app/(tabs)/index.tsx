@@ -26,6 +26,7 @@ export default function HomeScreen() {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<any>({});
+  const [availableProductId, setAvailableProductId] = useState<number>();
 
   useFocusEffect(
     useCallback(() => {
@@ -67,9 +68,14 @@ export default function HomeScreen() {
     });
   };
 
-  const buyNow = async(id: number) => {
+  const checkAddress = async(id: number) => {
     setIsModalOpen(true);
+    setAvailableProductId(id)
     return;
+  }
+
+  const buyNow = async() => {
+    const id = availableProductId;
     const token = await getToken('token');
     if (!token) {
       setShowLoginModal(true);
@@ -79,6 +85,7 @@ export default function HomeScreen() {
         if (response.data.status === 200) {
           setPreviousQuery(response.data.data);
           setMessage('');
+          setIsModalOpen(false);
         }
       }
     }
@@ -111,9 +118,13 @@ export default function HomeScreen() {
 
   return (
     <>
-      <CustomModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} >
-        <View style={{width: '60%', marginTop: '20%', alignSelf: 'center'}}>
-          <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} textColor={'black'} themeColor={'white'} />
+      <CustomModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}>
+        <View style={styles.addressModal}>
+          <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} textColor={'black'} themeColor={'white'} />
+          <View style={{alignItems: 'center'}}>
+            <Button title="Buy Now" color="blue" onPress={() => buyNow()} />
+            <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} />
+          </View>
         </View>
         <AddAddressForm isAddressModalOpen={isAddressModalOpen} setIsAddressModalOpen={setIsAddressModalOpen} fetchProfileData={fetchProfileData} />
       </CustomModal>
@@ -150,7 +161,7 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payment?.paymentStatus}</ThemedText>
                             {
                               _.orderStatus === 'pending' && (
-                                <Button style={styles.buyButton} title="Buy Now" onPress={() => buyNow(availableProduct?.id)} />
+                                <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct?.id)} />
                               )
                             }
                           </View>
@@ -266,6 +277,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     // ✅ Shadow for Android
     elevation: 4,
+  },
+  addressModal: {
+    width: '60%',
+    marginTop: '20%',
+    alignSelf: 'center',
+    gap: 20,
+    padding: 20,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
   }
 })
 

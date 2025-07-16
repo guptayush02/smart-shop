@@ -16,6 +16,7 @@ router.get("/get-pending-queries", middleware.authenticate, QueryController.getP
 router.post("/order-place", middleware.authenticate, OrderController.placeOrder);
 
 router.get("/profile", middleware.authenticate, UserController.getProfile);
+router.put("/profile/:id", middleware.authenticate, UserController.updateProfile);
 
 router.post("/add-address", middleware.authenticate, UserController.saveAddress);
 

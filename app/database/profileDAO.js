@@ -10,6 +10,10 @@ const prodileDao = {
       where: where,
       include: 'User'
     });
+  },
+
+  async update(options, where) {
+    return await Profile.update(options, { where: where });
   }
 }
 

@@ -22,6 +22,22 @@ const UserController = {
       console.log("error in user saveAddress function:", error)
       return res.status(400).send({ status: 400, error: `Error in user saveAddress function: ${error}` })
     }
+  },
+
+  async updateProfile(req, res) {
+    try {
+      const { user } = req;
+      const { defaultAddress } = req.body;
+      const { id } = req.params;
+      const where = { id };
+      const options = { defaultAddress };
+      await profileDao.update({ defaultAddress: false }, { userId: user?.id });
+      await profileDao.update(options, where);
+      return res.status(200).send({ status: 200, message: 'Address update successfully' });
+    } catch(error) {
+      console.log("error in user updateProfile function:", error)
+      return res.status(400).send({ status: 400, error: `Error in user updateProfile function: ${error}` })
+    }
   }
 }
 

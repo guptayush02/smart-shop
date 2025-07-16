@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     lat: DataTypes.FLOAT,
     long: DataTypes.FLOAT,
-    address: DataTypes.STRING
+    address: DataTypes.STRING,
+    defaultAddress: DataTypes.BOOLEAN
   }, {
     tableName: 'Profiles'
   });
