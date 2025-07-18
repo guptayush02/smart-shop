@@ -15,4 +15,7 @@ router.post("/vendor-query-response", middleware.authenticate, QueryController.v
 router.get("/categories", middleware.authenticate, VendorController.getCategories);
 router.post("/category", middleware.authenticate, VendorController.saveVendorCatrgory);
 
+router.get("/profile", middleware.authenticate, VendorController.getProfile);
+router.put("/profile/:id", middleware.authenticate, VendorController.updateProfile);
+
 module.exports = router

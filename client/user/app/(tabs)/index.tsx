@@ -38,7 +38,9 @@ export default function HomeScreen() {
       }
 
       if (isLogin) {
-        getQuery()
+        getQuery();
+      } else {
+        setPreviousQuery([]);
       }
     }, [isLogin])
   )

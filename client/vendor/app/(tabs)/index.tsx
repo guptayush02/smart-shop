@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -11,6 +11,7 @@ import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
 import { CustomDropdown } from '@/components/CustomDropdown';
 import { CategoriesDropdown } from '@/components/CategoryDropdown';
+import { useFocusEffect } from '@react-navigation/native';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -22,13 +23,23 @@ export default function HomeScreen() {
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
 
-  useEffect(() => {
-    if (isLogin) {
-      getQuery()
-    } else {
-      setPreviousQuery([])
-    }
-  }, [isLogin]);
+  // useEffect(() => {
+  //   if (isLogin) {
+  //     getQuery()
+  //   } else {
+  //     setPreviousQuery([])
+  //   }
+  // }, [isLogin]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isLogin) {
+        getQuery()
+      } else {
+        setPreviousQuery([])
+      }
+    }, [isLogin])
+  )
 
   const getQuery = async() => {
     const category = await getData('category')

@@ -1,23 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ThemedText } from "./ThemedText";
 import { StyleSheet, View, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import httpRequest from '@/helpers/httpRequests';
 import { ThemedView } from './ThemedView';
 import { CustomDropdown } from './CustomDropdown';
 import { getData, saveData } from '@/helpers/expoSecureStore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export function CategoriesDropdown({ isLogin, getQuery }: any) {
   const [category, setCategory] = useState('');
   const [categoryList, setCategoryList] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  useEffect(() => {
-    const getCategory = async() => {
-      const vendorCategory = await getData('category');
-      setCategory(vendorCategory);
-    };
-    getCategory();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const getCategory = async() => {
+        const vendorCategory = await getData('category');
+        setCategory(vendorCategory);
+      };
+
+      getCategory();
+    }, [])
+  )
 
   const onCategoryChange = (value:string) => {
     setShowDropdown(true)
