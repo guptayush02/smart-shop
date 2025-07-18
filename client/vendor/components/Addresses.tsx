@@ -15,7 +15,7 @@ import AddAddressForm from '@/components/AddAddressForm';
 export default function Addresses({ setIsAddressModalOpen, user, fetchProfileData, textColor = 'white', themeColor = 'transparent' }:any) {
 
   const onChangeDefaultAddress = async(event:any, userProfile:any) => {
-    const response:any = await httpRequest.put(`api/v1/vendor/profile/${userProfile?.id}`, { defaultAddress: event });
+    const response:any = await httpRequest.put(`api/v1/auth/profile/${userProfile?.id}`, { defaultAddress: event });
     if (response?.status === 200) {
       fetchProfileData()
     }

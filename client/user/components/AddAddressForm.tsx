@@ -15,7 +15,7 @@ export default function AddAddressForm({ isAddressModalOpen, setIsAddressModalOp
     if (!houseNumber || !area || !city || !pinCode) {
       return;
     }
-    const response: any = await httpRequest.post('api/v1/user/add-address', { houseNumber, area, city, pinCode });
+    const response: any = await httpRequest.post('api/v1/auth/add-address', { houseNumber, area, city, pinCode });
     if (response.data.status === 200) {
       fetchProfileData();
       setIsAddressModalOpen(false);

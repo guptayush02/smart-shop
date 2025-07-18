@@ -113,7 +113,7 @@ export default function HomeScreen() {
 
   const fetchProfileData = async () => {
     if (isLogin) {
-      const response: any = await httpRequest.get('api/v1/user/profile');
+      const response: any = await httpRequest.get('api/v1/auth/profile');
       if (response.data.status === 200) {
         setUser(response.data.data);
       }

@@ -43,31 +43,6 @@ const VendorController = {
       console.log("error in saveVendorCatrgory function:", error)
       return res.status(400).send({ status: 400, message: `Error in saveVendorCatrgory function: ${error}` });
     }
-  },
-
-  async getProfile(req, res) {
-    try {
-      return res.status(200).send({status: 200, data: req.user});
-    } catch (error) {
-      console.log("error in getProfile function:", error)
-      return res.status(400).send({ status: 400, message: `Error in getProfile function: ${error}` });
-    }
-  },
-
-  async updateProfile(req, res) {
-    try {
-      const { user } = req;
-      const { defaultAddress } = req.body;
-      const { id } = req.params;
-      const where = { id };
-      const options = { defaultAddress };
-      await profileDao.update({ defaultAddress: false }, { userId: user?.id });
-      await profileDao.update(options, where);
-      return res.status(200).send({ status: 200, message: 'Address update successfully' });
-    } catch(error) {
-      console.log("error in vendor updateProfile function:", error)
-      return res.status(400).send({ status: 400, error: `Error in vendor updateProfile function: ${error}` })
-    }
   }
 }
 

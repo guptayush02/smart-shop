@@ -52,6 +52,43 @@ const AuthController = {
       console.log("error in login function:", error);
       return res.status(400).send({ status: 400, error: `Error in AuthController in Signup function: ${error}` });
     }
+  },
+
+  async getProfile(req, res) {
+    try {
+      return res.status(200).send({status: 200, data: req.user});
+    } catch (error) {
+      console.log("error in user profile function:", error)
+      return res.status(400).send({ status: 400, error: `Error in user profile function: ${error}` })
+    }
+  },
+
+  async saveAddress(req, res) {
+    try {
+      const { user } = req;
+      const { houseNumber, area, city, pinCode } = req.body;
+      await profileDao.create({ userId: user.id, address: `${houseNumber}, ${area} ${city} ${pinCode}` });
+      return res.status(200).send({ status: 200, message: 'Address saved successfully' })
+    } catch (error) {
+      console.log("error in user saveAddress function:", error)
+      return res.status(400).send({ status: 400, error: `Error in user saveAddress function: ${error}` })
+    }
+  },
+
+  async updateProfile(req, res) {
+    try {
+      const { user } = req;
+      const { defaultAddress } = req.body;
+      const { id } = req.params;
+      const where = { id };
+      const options = { defaultAddress };
+      await profileDao.update({ defaultAddress: false }, { userId: user?.id });
+      await profileDao.update(options, where);
+      return res.status(200).send({ status: 200, message: 'Address update successfully' });
+    } catch(error) {
+      console.log("error in user updateProfile function:", error)
+      return res.status(400).send({ status: 400, error: `Error in user updateProfile function: ${error}` })
+    }
   }
 }
 
