@@ -16,7 +16,7 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
     const response:any = await httpRequest.post('api/v1/auth/login', { email, password });
     if (response.data.status === 200) {
       const { data } = response.data;
-      saveToken('token', data.token)
+      saveToken('token', data.token);
     }
     setShowLoginModal(false)
     setIsLogin(true)

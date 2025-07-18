@@ -1,8 +1,11 @@
-const { User } = require("../../models");
+const { User, Profile, VendorCategory } = require("../../models");
 
 const userDao = {
   async findOne(where) {
-    return await User.findOne({ where, include: 'Profiles' });
+    return await User.findOne({ where, include: [
+      { model: Profile },
+      { model: VendorCategory, as: 'vendorCategory' }
+    ]});
   },
 
   async create(params) {

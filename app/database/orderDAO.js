@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { Order, VendorResponse, User, Payments, Profile } = require("../../models");
 
 const orderDao = {
@@ -38,6 +39,25 @@ const orderDao = {
 
   async update(payload, where) {
     return await Order.update(payload, { where: where });
+  },
+
+  async findAllCategories(category) {
+    return await Order.findAll({
+      attributes: ['category'],
+      where: {
+        category: {
+          [Op.and]: [
+            { [Op.ne]: null },
+            { [Op.ne]: '' },
+            ...(category ? [{
+              [Op.like]: `%${category}%`
+            }] : [])
+          ]
+        }
+      },
+      group: ['category'],
+      raw: true
+    });
   }
 }
 

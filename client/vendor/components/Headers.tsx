@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Platform, TextInput, FlatList } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { getToken, removeToken } from '@/helpers/expoSecureStore';
+import { getData, removeData } from '@/helpers/expoSecureStore';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import httpRequest from '@/helpers/httpRequests';
+import { CustomDropdown } from './CustomDropdown';
 
 export function Headers({ isLogin, setIsLogin }:any) {
 
@@ -13,7 +15,7 @@ export function Headers({ isLogin, setIsLogin }:any) {
 
   useEffect(() => {
     const checkToken = async() => {
-      const token = await getToken('token');
+      const token = await getData('token');
       if (token) {
         setIsLogin(true)
       } else {
@@ -24,12 +26,12 @@ export function Headers({ isLogin, setIsLogin }:any) {
   }, [isLogin])
 
   const loginLogout = async() => {
-    const token = await getToken('token');
+    const token = await getData('token');
     if (!token) {
       setShowLoginModal(true);
       setIsLogin(false)
     } else {
-      await removeToken('token')
+      await removeData('token')
       setIsLogin(false)
     }
   }
@@ -43,8 +45,6 @@ export function Headers({ isLogin, setIsLogin }:any) {
     setShowSignupModal(false);
     setShowLoginModal(true);
   }
-
-  
 
   return (
     <View style={styles.header}>

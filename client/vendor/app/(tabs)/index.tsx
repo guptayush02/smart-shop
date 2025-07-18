@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Headers } from '@/components/Headers';
-import { getToken } from '@/helpers/expoSecureStore';
+import { getData, getToken } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
+import { CustomDropdown } from '@/components/CustomDropdown';
+import { CategoriesDropdown } from '@/components/CategoryDropdown';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -21,20 +23,21 @@ export default function HomeScreen() {
   const [showSignupModal, setShowSignupModal] = useState(false);
 
   useEffect(() => {
-    const getQuery = async() => {
-      const category = 'clothing';
-      const orderStatus = 'pending'
-      const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
-      if (response.data.status === 200) {
-        setPreviousQuery(response.data.data);
-      }
-    }
     if (isLogin) {
       getQuery()
     } else {
       setPreviousQuery([])
     }
   }, [isLogin]);
+
+  const getQuery = async() => {
+    const category = await getData('category')
+    const orderStatus = 'pending'
+    const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
+    if (response.data.status === 200) {
+      setPreviousQuery(response.data.data);
+    }
+  }
 
   const handleSend = async (orderId: number) => {
     const token = await getToken('token');
@@ -85,6 +88,9 @@ export default function HomeScreen() {
       >
         <ThemedView style={styles.mainContainer}>
           <ThemedView style={[styles.previousQueryContainer, { height: screenHeight * 0.7 }]}>
+            <View style={{ position: 'relative', zIndex: 999 }}>
+              <CategoriesDropdown isLogin={isLogin} getQuery={getQuery} />
+            </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {
                 previousQuery?.map((_:any, i) => (
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
-    padding: 10,
+    padding: 10
   },
   scrollContent: {
     paddingBottom: 10,

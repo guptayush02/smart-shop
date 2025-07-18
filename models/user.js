@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.VendorResponse, { foreignKey: 'vendorId' });
     // User.hasMany(models.Payments, { foreignKey: 'vendorId' });
     // User.hasMany(models.Payments, { foreignKey: 'userId' });
+    User.hasOne(models.VendorCategory, {
+      foreignKey: 'vendorId',
+      as: 'vendorCategory',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
   };
 
   return User;
