@@ -2,8 +2,8 @@ const userDao = require("../../../database/userDAO");
 const profileDao = require("../../../database/profileDAO");
 const bcryptjsScript = require("../../Utils/bcryptjs");
 const jsonWebToken = require("../../Utils/jsonWebToken");
-const openAIFunctions = require("../../Utils/openai");
-const extractJsonFromResponse = require("../../Utils/extractJSONContent");
+const getLocation = require("../../Utils/getLocation");
+// const extractJsonFromResponse = require("../../Utils/extractJSONContent");
 
 const AuthController = {
 
@@ -69,11 +69,11 @@ const AuthController = {
     try {
       const { user } = req;
       const { houseNumber, area, city, pinCode } = req.body;
-      const prompt = "You are a helpful assistant that extracts the lat long from the given address";
-      const address = `${houseNumber}, ${area} ${city} ${pinCode}`
-      const content = await openAIFunctions.analysisQueryFromAi(address, prompt);
-      const extracted = extractJsonFromResponse(content);
-      const { latitude: lat, longitude: long } = extracted;
+      const address = `${houseNumber}, ${area} ${city} ${pinCode}`;
+      const { lat, long } = await getLocation(address);
+      // const content = await openAIFunctions.analysisQueryFromAi(address, prompt);
+      // const extracted = extractJsonFromResponse(content);
+      // const { latitude: lat, longitude: long } = extracted;
       await profileDao.create({ userId: user.id, address, lat, long });
       return res.status(200).send({ status: 200, message: 'Address saved successfully' })
     } catch (error) {
@@ -88,7 +88,10 @@ const AuthController = {
       const { defaultAddress } = req.body;
       const { id } = req.params;
       const where = { id };
-      const options = { defaultAddress };
+
+      const userProfile = user?.Profiles?.find(profile => profile.id == id);
+      const { lat, long } = await getLocation(userProfile?.address);
+      const options = { defaultAddress, lat, long };
       await profileDao.update({ defaultAddress: false }, { userId: user?.id });
       await profileDao.update(options, where);
       return res.status(200).send({ status: 200, message: 'Address update successfully' });

@@ -11,14 +11,11 @@ const QueryController = {
       const { category, orderStatus } = req.query;
       const { role } = vendor;
       if (role === 'vendor') {
-        // console.log("vendor:", vendor);
         const vendorDefaultAddress = vendor?.Profiles.find((profile) => profile?.defaultAddress);
         const { lat, long } = vendorDefaultAddress;
         // TODO: Fetch all the open order from db based on the vendor catrgory
         // Add vendorID check where vendorId is loggedin vendor
-        let orders = await orderDAO.findAllNearestOrders(category, 5, lat, long); //orderStatus
-        // const jsonData = orders.map(order => order.toJSON());
-        console.log("orders:", orders)
+        let orders = await orderDAO.findAllNearestOrders(category, process.env.DISTANCE_IN_KM, lat, long);
         return res.status(200).send({status: 200, data: orders})
       }
       return res.status(404).send({ status: 404, message: "Insufficient permissions" })
@@ -47,7 +44,7 @@ const QueryController = {
         const { lat, long } = vendorDefaultAddress;
         // Step 2: Notify user about the query
         await vendorResponseDao.create({ orderId, deliverable_quantity, price, vendorId });
-        let orders = await orderDAO.findAllNearestOrders(category, 5, lat, long);
+        let orders = await orderDAO.findAllNearestOrders(category, process.env.DISTANCE_IN_KM, lat, long);
         return res.status(200).send({ status: 200, message: "Vendor Response successfully", data: orders })
       }
       return res.status(404).send({ status: 404, message: "Insufficient permissions" })
