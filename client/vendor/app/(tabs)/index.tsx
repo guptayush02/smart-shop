@@ -5,7 +5,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Headers } from '@/components/Headers';
-import { getData, getToken } from '@/helpers/expoSecureStore';
+import { getData } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
@@ -51,13 +51,13 @@ export default function HomeScreen() {
   }
 
   const handleSend = async (orderId: number) => {
-    const token = await getToken('token');
+    const [token, category] = await Promise.all([getData('token'), getData('category')]);
     const message = messages[orderId];
     if (!token) {
       setShowLoginModal(true);
     } else {
       if (messages) {
-        const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId });
+        const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId, category });
         if (response.data.status === 200) {
           setPreviousQuery(response.data.data);
           setMessages(prev => ({ ...prev, [orderId]: '' }));

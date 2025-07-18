@@ -3,7 +3,7 @@ const { User, Profile, VendorCategory } = require("../../models");
 const userDao = {
   async findOne(where) {
     return await User.findOne({ where, include: [
-      { model: Profile },
+      { model: Profile, as: 'Profiles' },
       { model: VendorCategory, as: 'vendorCategory' }
     ]});
   },

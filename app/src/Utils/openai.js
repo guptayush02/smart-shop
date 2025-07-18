@@ -16,34 +16,7 @@ const openAIFunctions = {
       max_tokens: 1000,
     });
     return completion.choices[0].message.content;
-  },
-
-  analysisObjectFromAi: async (orders) => {
-    const prompts = [];
-  
-    for (let i = 0; i < orders.length; i++) {
-      const { product, category, quantity } = orders[i];
-  
-      const completion = await openai.chat.completions.create({
-        model: 'openai/gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a helpful assistant. Create a shopping prompt from the following order:
-              Product: ${product}
-              Category: ${category}
-              Quantity: ${quantity}
-              Generate a natural, friendly sentence summarizing what the user wants to buy. also Format the output as a sentence that can be shown to the vendor.`
-          }
-        ],
-        max_tokens: 1000,
-      });
-  
-      prompts.push(completion.choices[0].message.content);
-    }
-  
-    return prompts; // Array of prompts
-  }  
+  }
   
 }
 
