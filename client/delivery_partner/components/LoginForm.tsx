@@ -17,7 +17,6 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
     if (response.data.status === 200) {
       const { data } = response.data;
       saveData('token', data.token);
-      saveData('category', data?.vendorCategory?.category);
     }
     setShowLoginModal(false)
     setIsLogin(true)
