@@ -17,8 +17,6 @@ import { launchImageLibrary } from 'react-native-image-picker';
 const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
-  const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
-  const [selectedFile, setSelectedFile] = useState<any>(null);
 
   const [isLogin, setIsLogin] = useState(false);
   const [messages, setMessages] = useState<{ [key: number]: string }>({});

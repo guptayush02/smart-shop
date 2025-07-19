@@ -11,8 +11,6 @@ const PaymentsController = {
       ]);
       vendorPayments = vendorPayments.map((payment) => payment.toJSON());
       totalEarning = totalEarning.map((payment) => payment.toJSON());
-      console.log("vendorPayments", vendorPayments)
-      console.log("totalEarning:", totalEarning)
       const paymentDetails = {
         vendorPayments,
         ...totalEarning[0]
