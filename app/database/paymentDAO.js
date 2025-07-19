@@ -1,4 +1,5 @@
-const { Payments } = require("../../models");
+const { Payments, VendorResponse, Order } = require("../../models");
+const { fn, col } = require('sequelize');
 
 const paymentDao = {
   async create(params) {
@@ -11,6 +12,27 @@ const paymentDao = {
 
   async update(payload, where) {
     return await Payments.update(payload, { where: where })
+  },
+
+  async findAll(where) {
+    return await Payments.findAll({
+      where,
+      include: [
+        { model: VendorResponse },
+        { model: Order }
+      ]
+    });
+  },
+
+  async totalEarning(where) {
+    return await Payments.findAll({
+      attributes: [
+        'vendorId',
+        [fn('SUM', col('price')), 'totalPaid'],
+      ],
+      where,
+      group: ['vendorId'],
+    });
   }
 }
 

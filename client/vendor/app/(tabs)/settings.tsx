@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, ScrollView, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -18,12 +18,25 @@ export default function TabTwoScreen() {
   const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState<any>({});
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<any>([]);
 
   useFocusEffect(
     useCallback(() => {
       fetchProfileData();
+      fetchPaymentsDetails();
     }, [isLogin])
   );
+
+  const fetchPaymentsDetails = async() => {
+    if(isLogin) {
+      const paymentStatus = '';
+      const response:any = await httpRequest.get(`api/v1/vendor/payment-details?paymentStatus=${paymentStatus}`);
+      if (response.status === 200) {
+        console.log("response.data.data:", response.data.data)
+        setPaymentDetails(response.data.data);
+      }
+    }
+  }
 
   const fetchProfileData = async () => {
     if (isLogin) {
@@ -56,6 +69,35 @@ export default function TabTwoScreen() {
                 <CategoriesDropdown isLogin={isLogin} getQuery={() => {}} />
               </View>
               <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} />
+
+              <ThemedView style={{ position: 'relative', zIndex: 999, gap: 8 }}>
+                <ThemedText>Total Earnings: {paymentDetails.totalPaid}rs</ThemedText>
+                <ScrollView horizontal>
+                  <View style={styles.table}>
+                    {/* Header Row */}
+                    <View style={[styles.row, styles.headerRow]}>
+                    <Text style={styles.headerCell}>Order ID</Text>
+                      <Text style={styles.headerCell}>SS Order ID</Text>
+                      <Text style={styles.headerCell}>Amount</Text>
+                      <Text style={styles.headerCell}>Currency</Text>
+                      <Text style={styles.headerCell}>Status</Text>
+                      <Text style={styles.headerCell}>PaymentID</Text>
+                    </View>
+
+                    {/* Data Rows */}
+                    {paymentDetails?.vendorPayments?.length && paymentDetails?.vendorPayments.map((payment:any, index:number) => (
+                      <View key={index} style={styles.row}>
+                        <Text style={styles.cell}>{payment?.razorpayOrderId}</Text>
+                        <Text style={styles.cell}>{payment?.orderId}</Text>
+                        <Text style={styles.cell}>{payment?.price}</Text>
+                        <Text style={styles.cell}>{payment?.currency}</Text>
+                        <Text style={styles.cell}>{payment?.paymentStatus}</Text>
+                        <Text style={styles.cell}>{payment?.razorpayPaymentId}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              </ThemedView>
             </ThemedView>
           ) : (
             <ThemedText>You are not login</ThemedText>
@@ -80,5 +122,31 @@ const styles = StyleSheet.create({
     display: 'flex',
     gap: 30,
     height: 'auto'
-  }
+  },
+  table: {
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerRow: {
+    backgroundColor: '#f0f0f0',
+  },
+  cell: {
+    padding: 10,
+    minWidth: 200,
+    textAlign: 'center',
+    color: 'white'
+  },
+  headerCell: {
+    padding: 10,
+    minWidth: 200,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });

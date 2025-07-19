@@ -84,25 +84,6 @@ export default function HomeScreen() {
     setShowLoginModal(true);
   }
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      // Implement your upload logic here
-      console.log('Uploading:', selectedFile.name);
-      // Example: You would typically send this file to a server using FormData
-      // const formData = new FormData();
-      // formData.append('file', selectedFile);
-      // fetch('/upload-endpoint', { method: 'POST', body: formData });
-    } else {
-      console.log('No file selected.');
-    }
-  };
-
-  const handleFileChange = (event:any) => {
-    const file = event.target.files[0];
-    setSelectedFile(file);
-  };
-
-
   return (
     <>
       <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} openSignupModal={openSignupModal} />
@@ -139,6 +120,9 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>No: {index + 1}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Price: {availableProduct.price}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payments?.paymentStatus}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Order ID: {availableProduct?.Payments?.razorpayOrderId}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Payment ID: {availableProduct?.Payments?.razorpayPaymentId}</ThemedText>
                           </View>
                         ))
                       )
