@@ -7,6 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     vendorId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
     paymentStatus: DataTypes.STRING,
+    razorpayPaymentId: DataTypes.STRING,
+    razorpayOrderId: DataTypes.STRING,
     userProfileId: {
       type: DataTypes.INTEGER,
       references: {

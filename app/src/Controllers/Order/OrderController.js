@@ -2,12 +2,13 @@ const vendorResponseDao = require("../../../database/vendorResponseDAO");
 const orderDAO = require("../../../database/orderDAO");
 const paymentDAO = require("../../../database/paymentDAO");
 const profileDAO = require("../../../database/profileDAO");
+const Razorpay = require('razorpay');
 
 const OrderController = {
   
   async placeOrder(req, res) {
     try {
-      const { vendorResponseId, orderStatus } = req.body;
+      const { vendorResponseId, orderStatus, razorpayPaymentId, razorpayOrderId } = req.body;
       let vendorResponse = await vendorResponseDao.findOne({ id: vendorResponseId });
       if (!vendorResponse) {
         return res.status(404).send({status: 404, message: 'Vendor response not found'})
@@ -32,11 +33,13 @@ const OrderController = {
       if (existingPayment) {
         existingPayment = existingPayment.toJSON();
         const updatePayload = {
-          paymentStatus: 'complete',
+          paymentStatus: 'completed',
           price,
           currency: 'INR',
           userProfileId: defaultAddress?.id,
-          vendorProfileId: vendorProfile?.id || null
+          vendorProfileId: vendorProfile?.id || null,
+          razorpayPaymentId,
+          razorpayOrderId
         }
         const where = { userId, vendorResponseId, vendorId, orderId }
         await paymentDAO.update(updatePayload, where)
@@ -48,9 +51,11 @@ const OrderController = {
           orderId,
           vendorId,
           vendorResponseId,
-          paymentStatus: 'processing',
+          paymentStatus: 'completed',
           profileId: defaultAddress?.id,
-          vendorProfileId: vendorProfile?.id || null
+          vendorProfileId: vendorProfile?.id || null,
+          razorpayPaymentId,
+          razorpayOrderId
         }
         await paymentDAO.create(paymentParams);
       }
@@ -60,6 +65,27 @@ const OrderController = {
     } catch (error) {
       console.log("error in placeOrder function:", error)
       return res.status(400).send({status: 400, error: `error in placeOrder function ${error}`});
+    }
+  },
+
+  async paymentInitiate(req, res) {
+    try {
+      const { price } = req.body
+      const razorpay = new Razorpay({
+        key_id: process.env.RZP_TEST_KEY,
+        key_secret: process.env.RZP_SECRET_KEY,
+      });
+
+      const order = await razorpay.orders.create({
+        amount: price * 100, // amount in paisa
+        currency: 'INR',
+        receipt: 'receipt#1',
+        payment_capture: 1,
+      });
+      return res.status(200).send({ status: 200, data: order });
+    } catch (error) {
+      console.log("error in paymentInitiate function:", error)
+      return res.status(400).send({status: 400, error: `error in paymentInitiate function ${error}`});
     }
   }
 }

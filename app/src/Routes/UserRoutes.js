@@ -15,4 +15,6 @@ router.get("/get-pending-queries", middleware.authenticate, QueryController.getP
 // 5
 router.post("/order-place", middleware.authenticate, OrderController.placeOrder);
 
+router.post("/payment-initiate", middleware.authenticate, OrderController.paymentInitiate);
+
 module.exports = router

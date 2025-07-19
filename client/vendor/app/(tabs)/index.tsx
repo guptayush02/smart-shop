@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity, Platform, Text, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -12,24 +12,20 @@ import SignupForm from '@/components/SignupForm';
 import { CustomDropdown } from '@/components/CustomDropdown';
 import { CategoriesDropdown } from '@/components/CategoryDropdown';
 import { useFocusEffect } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
+  const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+
   const [isLogin, setIsLogin] = useState(false);
   const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [previousQuery, setPreviousQuery] = useState([]);
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
-
-  // useEffect(() => {
-  //   if (isLogin) {
-  //     getQuery()
-  //   } else {
-  //     setPreviousQuery([])
-  //   }
-  // }, [isLogin]);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,7 +83,25 @@ export default function HomeScreen() {
     setShowSignupModal(false);
     setShowLoginModal(true);
   }
-  
+
+  const handleUpload = () => {
+    if (selectedFile) {
+      // Implement your upload logic here
+      console.log('Uploading:', selectedFile.name);
+      // Example: You would typically send this file to a server using FormData
+      // const formData = new FormData();
+      // formData.append('file', selectedFile);
+      // fetch('/upload-endpoint', { method: 'POST', body: formData });
+    } else {
+      console.log('No file selected.');
+    }
+  };
+
+  const handleFileChange = (event:any) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+  };
+
 
   return (
     <>
@@ -138,6 +152,13 @@ export default function HomeScreen() {
                         onSubmitEditing={() => handleSend(_?.id)}
                         returnKeyType="send"
                       />
+
+                      {/* TODO: integration left  */}
+                      <TouchableOpacity onPress={() => console.log(_?.id)} style={styles.sendButton}>
+                        <Ionicons name="attach-outline" size={28} color="#007AFF" />
+                      </TouchableOpacity>
+
+                      {/* Send button */}
                       <TouchableOpacity onPress={() => handleSend(_?.id)} style={styles.sendButton}>
                         <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
                       </TouchableOpacity>
@@ -147,20 +168,6 @@ export default function HomeScreen() {
               }
             </ScrollView>
           </ThemedView>
-
-          {/* <ThemedView style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Want to buy anything..."
-              value={message}
-              onChangeText={setMessage}
-              onSubmitEditing={handleSend}
-              returnKeyType="send"
-            />
-            <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-              <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
-            </TouchableOpacity>
-          </ThemedView> */}
         </ThemedView>
       </ParallaxScrollView>
     </>
@@ -253,4 +260,3 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 })
-

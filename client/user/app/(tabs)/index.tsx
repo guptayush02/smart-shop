@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<any>({});
   const [availableProductId, setAvailableProductId] = useState<number>();
+  const [orderPlacedByUser, setOrderPlacedByUser] = useState<any>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -72,20 +73,69 @@ export default function HomeScreen() {
     });
   };
 
-  const checkAddress = async(id: number) => {
+  const checkAddress = async(order: any) => {
     setIsModalOpen(true);
-    setAvailableProductId(id)
+    setAvailableProductId(order?.id)
+    setOrderPlacedByUser(order)
     return;
   }
 
-  const buyNow = async() => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+  
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const paymentInitiate = async() => {
+    const result:any = await httpRequest.post("api/v1/user/payment-initiate", { price: orderPlacedByUser.price });
+    if (result.status === 200) {
+      handleRazorpayPayment(result?.data?.data)
+    }
+  }
+
+  const handleRazorpayPayment = async (order: any) => {
+    const options = {
+      key: "rzp_test_1Rp5t6vJdIGawV",
+      amount: order.amount, // Amount in paisa (50000 = ₹500)
+      currency: 'INR',
+      name: 'Smart shop',
+      description: 'Product Description',
+      image: 'https://your-logo-url.com/logo.png',
+      order_id: order?.id,
+      handler: function (response:any) {
+        buyNow(response)
+      },
+      prefill: {
+        name: user?.name,
+        email: user?.email,
+        contact: '9999999999',
+      },
+      notes: {
+        address: user?.Profiles.find((profile:any) => profile.defaultAddress),
+      },
+      theme: {
+        color: '#007AFF',
+      },
+    };
+  
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  };
+  
+
+  const buyNow = async(paymentDetails: any) => {
     const id = availableProductId;
     const token = await getToken('token');
     if (!token) {
       setShowLoginModal(true);
     } else {
       if (id) {
-        const response:any = await httpRequest.post('api/v1/user/order-place', { vendorResponseId: id, orderStatus: "processing" });
+        const response:any = await httpRequest.post('api/v1/user/order-place', { vendorResponseId: id, orderStatus: "processing", razorpayPaymentId: paymentDetails?.razorpay_payment_id, razorpayOrderId: paymentDetails?.razorpay_order_id });
         if (response.data.status === 200) {
           setPreviousQuery(response.data.data);
           setMessage('');
@@ -126,7 +176,8 @@ export default function HomeScreen() {
         <View style={styles.addressModal}>
           <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} textColor={'black'} themeColor={'white'} />
           <View style={{alignItems: 'center'}}>
-            <Button title="Buy Now" color="blue" onPress={() => buyNow()} />
+            {/* <Button title="Buy Now" color="blue" onPress={() => buyNow()} /> */}
+            <Button title="Buy Now" color="blue" onPress={() => paymentInitiate()} />
             <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} />
           </View>
         </View>
@@ -164,9 +215,9 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payment?.paymentStatus}</ThemedText>
                             {
-                              // _.orderStatus === 'pending' && (
-                                <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct?.id)} />
-                              // )
+                              availableProduct?.Payment?.paymentStatus !== 'completed' && (
+                                <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct)} />
+                              )
                             }
                           </View>
                         ))
