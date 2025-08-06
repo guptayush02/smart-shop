@@ -1,4 +1,4 @@
-import { saveToken } from '@/helpers/expoSecureStore';
+import { saveData } from '@/helpers/expoSecureStore';
 import React, { useState } from 'react';
 import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import httpRequest from '@/helpers/httpRequests';
@@ -16,7 +16,8 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
     const response:any = await httpRequest.post('api/v1/auth/login', { email, password });
     if (response.data.status === 200) {
       const { data } = response.data;
-      saveToken('token', data.token)
+      saveData('token', data.token);
+      saveData('category', data?.vendorCategory?.category);
     }
     setShowLoginModal(false)
     setIsLogin(true)

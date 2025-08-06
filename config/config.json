@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "smart_shop",
-    "host": "127.0.0.1",
+    "username": "sql8793862",
+    "password": "I5vZt7ByqY",
+    "database": "sql8793862",
+    "host": "sql8.freesqldatabase.com",
     "dialect": "mysql"
   },
   "test": {

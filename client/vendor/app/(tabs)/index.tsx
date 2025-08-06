@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity, Platform, Text, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Headers } from '@/components/Headers';
-import { getToken } from '@/helpers/expoSecureStore';
+import { getData } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
+import { CustomDropdown } from '@/components/CustomDropdown';
+import { CategoriesDropdown } from '@/components/CategoryDropdown';
+import { useFocusEffect } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
+
   const [isLogin, setIsLogin] = useState(false);
   const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -20,30 +25,33 @@ export default function HomeScreen() {
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
 
-  useEffect(() => {
-    const getQuery = async() => {
-      const category = 'clothing';
-      const orderStatus = 'pending'
-      const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
-      if (response.data.status === 200) {
-        setPreviousQuery(response.data.data);
+  useFocusEffect(
+    useCallback(() => {
+      if (isLogin) {
+        getQuery()
+      } else {
+        setPreviousQuery([])
       }
+    }, [isLogin])
+  )
+
+  const getQuery = async() => {
+    const category = await getData('category')
+    const orderStatus = 'pending'
+    const response:any = await httpRequest.get(`api/v1/vendor/get-vendor-query?category=${category}&orderStatus=${orderStatus}`);
+    if (response.data.status === 200) {
+      setPreviousQuery(response.data.data);
     }
-    if (isLogin) {
-      getQuery()
-    } else {
-      setPreviousQuery([])
-    }
-  }, [isLogin]);
+  }
 
   const handleSend = async (orderId: number) => {
-    const token = await getToken('token');
+    const [token, category] = await Promise.all([getData('token'), getData('category')]);
     const message = messages[orderId];
     if (!token) {
       setShowLoginModal(true);
     } else {
       if (messages) {
-        const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId });
+        const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId, category });
         if (response.data.status === 200) {
           setPreviousQuery(response.data.data);
           setMessages(prev => ({ ...prev, [orderId]: '' }));
@@ -73,7 +81,6 @@ export default function HomeScreen() {
     setShowSignupModal(false);
     setShowLoginModal(true);
   }
-  
 
   return (
     <>
@@ -85,6 +92,9 @@ export default function HomeScreen() {
       >
         <ThemedView style={styles.mainContainer}>
           <ThemedView style={[styles.previousQueryContainer, { height: screenHeight * 0.7 }]}>
+            <View style={{ position: 'relative', zIndex: 999 }}>
+              <CategoriesDropdown isLogin={isLogin} getQuery={getQuery} />
+            </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {
                 previousQuery?.map((_:any, i) => (
@@ -108,6 +118,9 @@ export default function HomeScreen() {
                             <ThemedText style={{ color: 'black' }}>No: {index + 1}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Price: {availableProduct.price}</ThemedText>
                             <ThemedText style={{ color: 'black' }}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Payment Status: {availableProduct?.Payments?.paymentStatus}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Order ID: {availableProduct?.Payments?.razorpayOrderId}</ThemedText>
+                            <ThemedText style={{ color: 'black' }}>Payment ID: {availableProduct?.Payments?.razorpayPaymentId}</ThemedText>
                           </View>
                         ))
                       )
@@ -121,6 +134,13 @@ export default function HomeScreen() {
                         onSubmitEditing={() => handleSend(_?.id)}
                         returnKeyType="send"
                       />
+
+                      {/* TODO: integration left  */}
+                      <TouchableOpacity onPress={() => console.log(_?.id)} style={styles.sendButton}>
+                        <Ionicons name="attach-outline" size={28} color="#007AFF" />
+                      </TouchableOpacity>
+
+                      {/* Send button */}
                       <TouchableOpacity onPress={() => handleSend(_?.id)} style={styles.sendButton}>
                         <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
                       </TouchableOpacity>
@@ -130,20 +150,6 @@ export default function HomeScreen() {
               }
             </ScrollView>
           </ThemedView>
-
-          {/* <ThemedView style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Want to buy anything..."
-              value={message}
-              onChangeText={setMessage}
-              onSubmitEditing={handleSend}
-              returnKeyType="send"
-            />
-            <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-              <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
-            </TouchableOpacity>
-          </ThemedView> */}
         </ThemedView>
       </ParallaxScrollView>
     </>
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
-    padding: 10,
+    padding: 10
   },
   scrollContent: {
     paddingBottom: 10,
@@ -236,4 +242,3 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 })
-

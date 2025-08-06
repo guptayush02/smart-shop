@@ -5,6 +5,8 @@ const connection = require("./app/database/dbConnection");
 const authRoutes = require("./app/src/Routes/AuthRoutes");
 const userRoutes = require("./app/src/Routes/UserRoutes");
 const vendorRoutes = require("./app/src/Routes/VendorRoutes");
+const deliveryPartnerRoutes = require('./app/src/Routes/DeliveryPartnerRoutes');
+require('dotenv').config();
 
 const cors = require('cors');
 
@@ -18,7 +20,8 @@ const port = 3000;
 
 const allowedOrigins = [
   'http://localhost:8081',
-  'http://localhost:8082'
+  'http://localhost:8082',
+  'http://localhost:8083'
 ];
 
 app.use(cors({
@@ -38,6 +41,7 @@ app.use(cors({
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/vendor", vendorRoutes);
+app.use("/api/v1/delivery-partner", deliveryPartnerRoutes);
 
 connection.connect((err) => {
   if (err) {
