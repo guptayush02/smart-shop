@@ -3,7 +3,7 @@ const profileDao = require("../../../database/profileDAO");
 const bcryptjsScript = require("../../Utils/bcryptjs");
 const jsonWebToken = require("../../Utils/jsonWebToken");
 const getLocation = require("../../Utils/getLocation");
-const sequelize = require('sequelize');
+// const sequelize = require('sequelize');
 
 const AuthController = {
 
@@ -31,7 +31,7 @@ const AuthController = {
   },
 
   async createAccount(req, res) {
-    const t = await sequelize.transaction();
+    // const t = await sequelize.transaction();
     try {
       const { name, email, password, role, lat, long, address } = req.body;
   
@@ -41,7 +41,7 @@ const AuthController = {
       }
   
       const hash = await bcryptjsScript.encryption(password);
-      let createdUser = await userDao.create({ name, email, password: hash, role }, { transaction: t });
+      let createdUser = await userDao.create({ name, email, password: hash, role });
       let user = createdUser.toJSON();
   
       if (role !== 'admin') {
@@ -49,24 +49,20 @@ const AuthController = {
         try {
           location = await getLocation(address);
         } catch (locErr) {
-          await t.rollback();
           return res.status(500).send({ status: 500, message: "Failed to get location", error: locErr.message });
         }
   
         const payload = { userId: user.id, lat: location.lat, long: location.long, address, defaultAddress: true };
-        await profileDao.create(payload, { transaction: t });
+        await profileDao.create(payload);
   
         // Optionally, fetch created profiles via proper where clause
-        const profiles = await profileDao.findAll({ where: { userId: user.id }, transaction: t });
+        const profiles = await profileDao.findAll({ where: { userId: user.id } });
   
-        await t.commit();
         return res.status(201).send({ status: 201, message: "Profile created successfully", user, profiles });
       } else {
-        await t.commit();
         return res.status(201).send({ status: 201, message: "Admin created successfully", user });
       }
     } catch (error) {
-      await t.rollback();
       console.log("error in createAccount:", error);
       return res.status(500).send({ status: 500, message: `Error in createAccount: ${error.message}` });
     }
