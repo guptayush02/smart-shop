@@ -8,8 +8,8 @@ const userDao = {
     ]});
   },
 
-  async create(params) {
-    return await User.create(params);
+  async create(params, options = {}) {
+    return await User.create(params, options);
   }
 }
 

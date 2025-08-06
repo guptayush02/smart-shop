@@ -31,31 +31,73 @@ const AuthController = {
   },
 
   async createAccount(req, res) {
+    const t = await sequelize.transaction();
     try {
       const { name, email, password, role, lat, long, address } = req.body;
-
+  
       const exist = await userDao.findOne({ email });
       if (exist) {
-        return res.status(404).send({ status: 404, message: "Email is already exist" });
+        return res.status(400).send({ status: 400, message: "Email already exists" });
       }
-
+  
       const hash = await bcryptjsScript.encryption(password);
-      let createdUser = await userDao.create({ name, email, password: hash, role });
+      let createdUser = await userDao.create({ name, email, password: hash, role }, { transaction: t });
       let user = createdUser.toJSON();
-
-      if (role != 'admin') {
-        const location = await getLocation(address);
+  
+      if (role !== 'admin') {
+        let location;
+        try {
+          location = await getLocation(address);
+        } catch (locErr) {
+          await t.rollback();
+          return res.status(500).send({ status: 500, message: "Failed to get location", error: locErr.message });
+        }
+  
         const payload = { userId: user.id, lat: location.lat, long: location.long, address, defaultAddress: true };
-        await profileDao.create(payload);
-        createdUser = await profileDao.findAll({ userId: user.id });
+        await profileDao.create(payload, { transaction: t });
+  
+        // Optionally, fetch created profiles via proper where clause
+        const profiles = await profileDao.findAll({ where: { userId: user.id }, transaction: t });
+  
+        await t.commit();
+        return res.status(201).send({ status: 201, message: "Profile created successfully", user, profiles });
+      } else {
+        await t.commit();
+        return res.status(201).send({ status: 201, message: "Admin created successfully", user });
       }
-
-      return res.status(200).send({status: 200, message: "Profile create successfully"});
-    } catch(error) {
-      console.log("error in login function:", error);
-      return res.status(400).send({ status: 400, error: `Error in AuthController in Signup function: ${error}` });
+    } catch (error) {
+      await t.rollback();
+      console.log("error in createAccount:", error);
+      return res.status(500).send({ status: 500, message: `Error in createAccount: ${error.message}` });
     }
   },
+
+  // async createAccount(req, res) {
+  //   try {
+  //     const { name, email, password, role, lat, long, address } = req.body;
+
+  //     const exist = await userDao.findOne({ email });
+  //     if (exist) {
+  //       return res.status(404).send({ status: 404, message: "Email is already exist" });
+  //     }
+
+  //     const hash = await bcryptjsScript.encryption(password);
+  //     let createdUser = await userDao.create({ name, email, password: hash, role });
+  //     let user = createdUser.toJSON();
+
+  //     if (role != 'admin') {
+  //       const location = await getLocation(address);
+  //       const payload = { userId: user.id, lat: location.lat, long: location.long, address, defaultAddress: true };
+  //       await profileDao.create(payload);
+  //       createdUser = await profileDao.findAll({ userId: user.id });
+  //     }
+
+  //     return res.status(200).send({status: 200, message: "Profile create successfully"});
+  //   } catch(error) {
+  //     console.log("error in login function:", error);
+  //     return res.status(400).send({ status: 400, error: `Error in AuthController in Signup function: ${error}` });
+  //   }
+  // },
 
   async getProfile(req, res) {
     try {
