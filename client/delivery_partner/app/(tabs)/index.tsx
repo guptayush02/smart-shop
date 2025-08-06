@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [previousQuery, setPreviousQuery] = useState([]);
-  const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
+  const [openVendorInsides, setOpenVendorInsides] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
 
   useFocusEffect(
@@ -40,27 +40,14 @@ export default function HomeScreen() {
     console.log("response:", response);
     if (response.data.status === 200) {
       setPreviousQuery(response.data.data);
+      response.data.data.map((_:any, index:number) => {
+        setOpenVendorInsides(prev => new Set(prev).add(index));
+      })
     }
   }
 
-  const handleSend = async (orderId: number) => {
-    // const [token, category] = await Promise.all([getData('token'), getData('category')]);
-    // const message = messages[orderId];
-    // if (!token) {
-    //   setShowLoginModal(true);
-    // } else {
-    //   if (messages) {
-    //     const response:any = await httpRequest.post('api/v1/vendor/vendor-query-response', { query: message, orderId, category });
-    //     if (response.data.status === 200) {
-    //       setPreviousQuery(response.data.data);
-    //       setMessages(prev => ({ ...prev, [orderId]: '' }));
-    //     }
-    //   }
-    // }
-  };
-
   const displayProducts = (i: number) => {
-    setOpenVendorIndices(prev => {
+    setOpenVendorInsides(prev => {
       const newSet = new Set(prev);
       if (newSet.has(i)) {
         newSet.delete(i);
@@ -79,6 +66,10 @@ export default function HomeScreen() {
   const openLoginModal = () => {
     setShowSignupModal(false);
     setShowLoginModal(true);
+  }
+
+  const riderResponse = (type:string) => {
+    console.log("type:", type)
   }
 
   return (
@@ -134,9 +125,9 @@ export default function HomeScreen() {
                       </View>
                     </View>
 
-                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorIndices.has(i) ? <ThemedText style={{ color: 'black' }}>View Less</ThemedText> : <ThemedText style={{ color: 'black' }}>View More</ThemedText>}</TouchableOpacity>
+                    <TouchableOpacity onPress={() => displayProducts(i)}>{openVendorInsides.has(i) ? <ThemedText style={{ color: 'black' }}>View Less</ThemedText> : <ThemedText style={{ color: 'black' }}>View More</ThemedText>}</TouchableOpacity>
                     {
-                      openVendorIndices.has(i) && (
+                      openVendorInsides.has(i) && (
                         _?.VendorResponses.map((availableProduct:any, index:number) => (
                           <View key={index} style={styles.card}>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -148,8 +139,16 @@ export default function HomeScreen() {
                                 <ThemedText style={{ color: 'black' }}>Order ID: {availableProduct?.Payments?.razorpayOrderId}</ThemedText>
                                 <ThemedText style={{ color: 'black' }}>Payment ID: {availableProduct?.Payments?.razorpayPaymentId}</ThemedText>
                               </View>
+                              <View style={{flexDirection: 'row', gap: 20}}>
+                                <TouchableOpacity onPress={() => riderResponse('accept')} style={[styles.buttons, {backgroundColor: 'rgb(0, 122, 255)'}]}>
+                                  <ThemedText>Accept</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => riderResponse('reject')} style={[styles.buttons, {backgroundColor: 'red'}]}>
+                                  <ThemedText>Reject</ThemedText>
+                                </TouchableOpacity>
+                              </View>
                               <View>
-                              <TouchableOpacity
+                                <TouchableOpacity
                                   key={availableProduct.id}
                                   onPress={() => {
                                     const destination = `${availableProduct?.vendor?.profile.lat},${availableProduct?.vendor?.profile.long}`;
@@ -281,4 +280,12 @@ const styles = StyleSheet.create({
     // ✅ Shadow for Android
     elevation: 4,
   },
+  buttons: {
+    height: 30,
+    width: 80,
+    borderRadius: 6,
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 })

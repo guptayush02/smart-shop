@@ -2,7 +2,9 @@ const vendorResponseDao = require("../../../database/vendorResponseDAO");
 const orderDAO = require("../../../database/orderDAO");
 const paymentDAO = require("../../../database/paymentDAO");
 const profileDAO = require("../../../database/profileDAO");
+const riderDAO = require("../../../database/riderDAO");
 const Razorpay = require('razorpay');
+const userDAO = require("../../../database/userDAO");
 
 const OrderController = {
   
@@ -17,6 +19,19 @@ const OrderController = {
 
       const userId = vendorResponse?.Order?.userId;
       const { price, vendorId, orderId } = vendorResponse;
+
+      // find nearest riders from the vendor
+      let vedor = await userDAO.findOne({ id: vendorId, '$Profiles.defaultAddress$': true });
+      if (vedor) {
+        vedor = vedor.toJSON();
+        console.log("vedor:", vedor?.Profiles[0])
+        const { lat, long } = vedor?.Profiles[0];
+        
+        const nearestRider = await riderDAO.findNearestRider(lat, long);
+        console.log("nearestRider:", nearestRider)
+      }
+
+      return;
       
       const updateData = { orderStatus };
       const where = { id: orderId };
@@ -59,6 +74,9 @@ const OrderController = {
         }
         await paymentDAO.create(paymentParams);
       }
+
+      
+
       const allOrder = await orderDAO.findAll({ userId })
       const jsonData = allOrder.map(order => order.toJSON());
       return res.status(200).send({status: 200, message: 'Order place successfully, will update you shortly', data: jsonData});
