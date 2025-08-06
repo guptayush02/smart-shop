@@ -2,7 +2,7 @@ const OpenAI = require("openai");
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: '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'
+  apiKey: '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'
 });
 
 const openAIFunctions = {
