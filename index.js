@@ -15,13 +15,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const hostname = "127.0.0.1";
+const hostname = "0.0.0.0";
 const port = 3000;
 
 const allowedOrigins = [
   'http://localhost:8081',
   'http://localhost:8082',
-  'http://localhost:8083'
+  'http://localhost:8083',
+  'https://smart-shop-f5ye.onrender.com'
 ];
 
 app.use(cors({
@@ -37,6 +38,13 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+
+
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);

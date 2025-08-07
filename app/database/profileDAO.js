@@ -1,8 +1,8 @@
 const { Profile } = require("../../models");
 
 const prodileDao = {
-  async create(params) {
-    return await Profile.create(params);
+  async create(params, options = {}) {
+    return await Profile.create(params, options);
   },
 
   async findAll(where) {

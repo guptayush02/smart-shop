@@ -3,7 +3,7 @@ const profileDao = require("../../../database/profileDAO");
 const bcryptjsScript = require("../../Utils/bcryptjs");
 const jsonWebToken = require("../../Utils/jsonWebToken");
 const getLocation = require("../../Utils/getLocation");
-// const extractJsonFromResponse = require("../../Utils/extractJSONContent");
+// const sequelize = require('sequelize');
 
 const AuthController = {
 
