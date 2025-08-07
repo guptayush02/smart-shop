@@ -6,7 +6,7 @@ const authRoutes = require("./app/src/Routes/AuthRoutes");
 const userRoutes = require("./app/src/Routes/UserRoutes");
 const vendorRoutes = require("./app/src/Routes/VendorRoutes");
 const deliveryPartnerRoutes = require('./app/src/Routes/DeliveryPartnerRoutes');
-require('dotenv').config('./.env');
+require('dotenv').config();
 
 const cors = require('cors');
 
