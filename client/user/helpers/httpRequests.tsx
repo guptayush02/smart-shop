@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './expoSecureStore';
 
-const baseUrl = 'https://smart-shop-f5ye.onrender.com/'
+const baseUrl = 'http://192.168.1.13:3000/'
 
 const httpRequest = {
   post: async(route: string, body:{}) => {
