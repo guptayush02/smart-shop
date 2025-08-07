@@ -5,7 +5,7 @@ const baseUrl = 'https://smart-shop-f5ye.onrender.com/'
 
 const httpRequest = {
   post: async(route: string, body:{}) => {
-    if (route.includes('/login') || route.includes('/signup')) {
+    if (route.includes('/login') || route.includes('/create-account')) {
       return await axios.post(`${baseUrl}${route}`, body);
     } else {
       const token = await getToken('token');

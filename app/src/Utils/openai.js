@@ -1,8 +1,9 @@
 const OpenAI = require("openai");
 
+console.log("process.env:", process.env.DISTANCE_IN_KM)
 const openai = new OpenAI({
   baseURL: 'https://api.perplexity.ai',
-  apiKey: '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'
+  apiKey: process.env.OPEN_AI_API_KEY
 });
 
 const openAIFunctions = {

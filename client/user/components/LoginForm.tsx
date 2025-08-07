@@ -10,10 +10,12 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
   const [password, setPassword] = useState('');
 
   const login = async() => {
+    console.log("press login")
     if (!email || !password) {
       return;
     }
     const response:any = await httpRequest.post('api/v1/auth/login', { email, password });
+    console.log("login response:", response)
     if (response.data.status === 200) {
       const { data } = response.data;
       saveToken('token', data.token);
@@ -38,7 +40,14 @@ export default function LoginForm({ showLoginModal, setShowLoginModal, setIsLogi
             <TextInput placeholder="Password" secureTextEntry style={styles.input} value={password} onChangeText={setPassword} />
             <Button title="Login" onPress={login} />
             <Button title="Cancel" color="red" onPress={() => setShowLoginModal(false)} />
-            <ThemedText style={{ color: 'black' }}>Dont have account <TouchableOpacity onPress={openSignupModal}>Click here</TouchableOpacity></ThemedText>
+            {/* <Text style={{ color: 'black' }}>Dont have account <TouchableOpacity onPress={openSignupModal}>Click here</TouchableOpacity></Text> */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+              <Text style={{ color: 'black' }}>Don't have an account? </Text>
+              <TouchableOpacity onPress={openSignupModal}>
+                <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>Click here</Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
         </View>
       </Modal>
