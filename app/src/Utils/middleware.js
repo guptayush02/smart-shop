@@ -3,6 +3,9 @@ const userDAO = require("../../database/userDAO");
 
 const middleware = {
   authenticate: async(req, res, next) => {
+    if (req.path === '/payment-callback') {
+      return next();
+    }
     const { token } = req.headers;
     const decodedData = await jsonWebToken.decodeToken(token);
     if (!decodedData) {

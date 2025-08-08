@@ -24,9 +24,20 @@ export default function HomeScreen() {
   const [previousQuery, setPreviousQuery] = useState([]);
   const [openVendorIndices, setOpenVendorIndices] = useState<Set<number>>(new Set());
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [user, setUser] = useState({});
 
   useFocusEffect(
     useCallback(() => {
+      const checkToken = async() => {
+        const token:any = await getData('token');
+        if (token) {
+          setIsLogin(true)
+        } else {
+          setIsLogin(false)
+        }
+      }
+      checkToken()
+
       if (isLogin) {
         getQuery()
       } else {
@@ -44,7 +55,7 @@ export default function HomeScreen() {
     }
   }
 
-  const handleSend = async (orderId: number) => {
+  const handleSend = async (orderId: number, i: number) => {
     const [token, category] = await Promise.all([getData('token'), getData('category')]);
     const message = messages[orderId];
     if (!token) {
@@ -58,6 +69,7 @@ export default function HomeScreen() {
         }
       }
     }
+    displayProducts(i)
   };
 
   const displayProducts = (i: number) => {
@@ -82,20 +94,35 @@ export default function HomeScreen() {
     setShowLoginModal(true);
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileData();
+    }, [isLogin])
+  );
+
+  const fetchProfileData = async () => {
+    if (isLogin) {
+      const response: any = await httpRequest.get('api/v1/auth/profile');
+      if (response.data.status === 200) {
+        setUser(response.data.data);
+      }
+    }
+  };
+
   return (
     <>
       <LoginForm showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal} setIsLogin={setIsLogin} openSignupModal={openSignupModal} />
       <SignupForm showSignupModal={showSignupModal} setShowSignupModal={setShowSignupModal} setIsLogin={setIsLogin} openLoginModal={openLoginModal} />
       <ParallaxScrollView
         headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-        headerImage={<Headers isLogin={isLogin} setIsLogin={setIsLogin} />}
+        headerImage={<Headers isLogin={isLogin} setIsLogin={setIsLogin} user={user} />}
       >
         <ThemedView style={styles.mainContainer}>
           <ThemedView style={[styles.previousQueryContainer, { height: screenHeight * 0.7 }]}>
             <View style={{ position: 'relative', zIndex: 999 }}>
               <CategoriesDropdown isLogin={isLogin} getQuery={getQuery} />
             </View>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            {/* <ScrollView contentContainerStyle={styles.scrollContent}>
               {
                 previousQuery?.map((_:any, i) => (
                   <View key={i} style={styles.card}>
@@ -135,12 +162,10 @@ export default function HomeScreen() {
                         returnKeyType="send"
                       />
 
-                      {/* TODO: integration left  */}
                       <TouchableOpacity onPress={() => console.log(_?.id)} style={styles.sendButton}>
                         <Ionicons name="attach-outline" size={28} color="#007AFF" />
                       </TouchableOpacity>
 
-                      {/* Send button */}
                       <TouchableOpacity onPress={() => handleSend(_?.id)} style={styles.sendButton}>
                         <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
                       </TouchableOpacity>
@@ -148,6 +173,60 @@ export default function HomeScreen() {
                   </View>
                 ))
               }
+            </ScrollView> */}
+            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+              {previousQuery?.map((item: any, i) => (
+                <View key={i} style={styles.card}>
+                  <ThemedText style={styles.cardTitle}>No: {i + 1}</ThemedText>
+
+                  <ThemedText style={styles.cardText}>Customer wants: {item.product}</ThemedText>
+                  <ThemedText style={styles.cardText}>Category: {item.category}</ThemedText>
+                  <ThemedText style={styles.cardText}>Quantity: {item.quantity}</ThemedText>
+                  <ThemedText style={styles.statusText}>Status: {item.orderStatus}</ThemedText>
+
+                  {item.quantity === 0 || !item.product || !item.category ? (
+                    <ThemedText style={styles.invalidText}>Not a valid product</ThemedText>
+                  ) : null}
+
+                  <TouchableOpacity onPress={() => displayProducts(i)} activeOpacity={0.7}>
+                    <ThemedText style={styles.toggleLink}>
+                      {openVendorIndices.has(i) ? 'View Less' : 'View More'}
+                    </ThemedText>
+                  </TouchableOpacity>
+
+                  {openVendorIndices.has(i) &&
+                    item?.VendorResponses?.map((availableProduct: any, index: number) => (
+                      <View key={index} style={styles.subCard}>
+                        <ThemedText style={styles.subCardTitle}>No: {index + 1}</ThemedText>
+                        <ThemedText style={styles.cardText}>Price: {availableProduct.price}</ThemedText>
+                        <ThemedText style={styles.cardText}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
+                        <ThemedText style={styles.cardText}>Payment Status: {availableProduct?.Payments?.paymentStatus}</ThemedText>
+                        <ThemedText style={styles.cardText}>Order ID: {availableProduct?.Payments?.razorpayOrderId}</ThemedText>
+                        <ThemedText style={styles.cardText}>Payment ID: {availableProduct?.Payments?.razorpayPaymentId}</ThemedText>
+                      </View>
+                    ))}
+
+                  <ThemedView style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Want to buy anything..."
+                      value={messages[item?.id] || ''}
+                      onChangeText={(text: string) => setMessages((prev) => ({ ...prev, [item?.id]: text }))}
+                      onSubmitEditing={() => handleSend(item?.id, i)}
+                      returnKeyType="send"
+                      placeholderTextColor="#999"
+                    />
+
+                    <TouchableOpacity onPress={() => console.log(item?.id)} style={styles.iconButton} activeOpacity={0.7}>
+                      <Ionicons name="attach-outline" size={26} color="#007AFF" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => handleSend(item?.id, i)} style={styles.iconButton} activeOpacity={0.7}>
+                      <Ionicons name="arrow-up-circle" size={28} color="#007AFF" />
+                    </TouchableOpacity>
+                  </ThemedView>
+                </View>
+              ))}
             </ScrollView>
           </ThemedView>
         </ThemedView>
@@ -168,28 +247,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10
   },
-  scrollContent: {
-    paddingBottom: 10,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    width: '100%'
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: '#f2f2f2',
-  },
+  // scrollContent: {
+  //   paddingBottom: 10,
+  // },
+  // inputContainer: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: '#fff',
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 8,
+  //   borderTopWidth: 1,
+  //   borderColor: '#ccc',
+  //   borderRadius: 8,
+  //   width: '100%'
+  // },
+  // textInput: {
+  //   flex: 1,
+  //   fontSize: 16,
+  //   paddingVertical: 8,
+  //   paddingHorizontal: 12,
+  //   borderRadius: 20,
+  //   backgroundColor: '#f2f2f2',
+  // },
   sendButton: {
     marginLeft: 10,
   },
@@ -226,19 +305,109 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '100%',
   },
+  // card: {
+  //   backgroundColor: '#fff',
+  //   borderColor: '#ccc',
+  //   borderWidth: 1,
+  //   borderRadius: 10,
+  //   padding: 12,
+  //   marginVertical: 8,
+  //   // ✅ Shadow for iOS
+  //   shadowColor: '#000',
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  //   // ✅ Shadow for Android
+  //   elevation: 4,
+  // },
+  scrollContent: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
   card: {
     backgroundColor: '#fff',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    marginVertical: 8,
-    // ✅ Shadow for iOS
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 16,
+    // shadows for iOS
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // ✅ Shadow for Android
-    elevation: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    // elevation for Android
+    elevation: 5,
+  },
+  subCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 14,
+    marginVertical: 8,
+    marginLeft: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: '#222',
+  },
+  subCardTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 6,
+    color: '#444',
+  },
+  cardText: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
+  },
+  statusText: {
+    fontWeight: '700',
+    fontSize: 14,
+    color: '#007AFF',
+    marginBottom: 8,
+  },
+  invalidText: {
+    color: 'red',
+    fontWeight: '700',
+    marginBottom: 10,
+    fontSize: 13,
+  },
+  toggleLink: {
+    color: '#007AFF',
+    fontWeight: '600',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+  },
+
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    backgroundColor: '#f2f2f2',
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    borderRadius: 22,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    color: '#333',
+  },
+  iconButton: {
+    paddingHorizontal: 10,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })

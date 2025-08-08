@@ -14,6 +14,8 @@ import Addresses from '@/components/Addresses';
 import CustomModal from '@/components/CustomModal';
 import AddAddressForm from '@/components/AddAddressForm';
 import AnimatedInputBox from '@/components/AnimatedInputBox';
+import RazorpayWebView from '@/components/RazorpayWebView';
+// import RazorpayCheckout from 'react-native-razorpay';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -29,6 +31,9 @@ export default function HomeScreen() {
   const [user, setUser] = useState<any>({});
   const [availableProductId, setAvailableProductId] = useState<number>();
   const [orderPlacedByUser, setOrderPlacedByUser] = useState<any>({});
+
+  const [isRzpModalVisible, setRzpModalVisible] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState('');
 
   const keyboardHeight = useRef(new Animated.Value(0)).current;
 
@@ -138,37 +143,85 @@ export default function HomeScreen() {
   const paymentInitiate = async() => {
     const result:any = await httpRequest.post("api/v1/user/payment-initiate", { price: orderPlacedByUser.price });
     if (result.status === 200) {
-      handleRazorpayPayment(result?.data?.data)
+      console.log("result.data:", result.data)
+      if (Platform.OS === 'web') {
+        handleRazorpayPayment(result?.data?.data)
+      } else {
+        setPaymentUrl(result.data?.data?.paymentLink?.short_url);
+        setRzpModalVisible(true);
+      }
     }
   }
 
+  const onRzpPaymentComplete = (success: boolean) => {
+    setRzpModalVisible(false);
+    console.log("success:", success)
+    if (success) {
+      // buyNow()
+      // Handle successful order placement here
+      // Maybe refresh queries or fetch orders again
+      alert('Payment Successful!');
+      // Call any further logic you have after payment
+    } else {
+      alert('Payment Failed or Canceled');
+    }
+  };
+
   const handleRazorpayPayment = async (order: any) => {
-    const options = {
-      key: "rzp_test_1Rp5t6vJdIGawV",
-      amount: order.amount, // Amount in paisa (50000 = ₹500)
-      currency: 'INR',
-      name: 'Smart shop',
-      description: 'Product Description',
-      image: 'https://your-logo-url.com/logo.png',
-      order_id: order?.id,
-      handler: function (response:any) {
-        buyNow(response)
-      },
-      prefill: {
-        name: user?.name,
-        email: user?.email,
-        contact: '9999999999',
-      },
-      notes: {
-        address: user?.Profiles.find((profile:any) => profile.defaultAddress),
-      },
-      theme: {
-        color: '#007AFF',
-      },
-    };
-  
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
+    if (Platform.OS === 'web') {
+      const options = {
+        key: "rzp_test_1Rp5t6vJdIGawV",
+        amount: order.amount, // Amount in paisa (50000 = ₹500)
+        currency: 'INR',
+        name: 'Smart shop',
+        description: 'Product Description',
+        image: 'https://your-logo-url.com/logo.png',
+        order_id: order?.id,
+        handler: function (response:any) {
+          buyNow(response)
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+          contact: '9999999999',
+        },
+        notes: {
+          address: user?.Profiles.find((profile:any) => profile.defaultAddress),
+        },
+        theme: {
+          color: '#007AFF',
+        },
+      };
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    }
+    // else {
+    //   const options = {
+    //     key: "rzp_test_1Rp5t6vJdIGawV", // Your key here
+    //     amount: order.amount, // amount in paise = ₹100
+    //     currency: "INR",
+    //     name: "Smart shop",
+    //     description: "Product Description",
+    //     order_id: order?.id,
+    //     prefill: {
+    //       name: user?.name,
+    //       email: user?.email,
+    //       contact: '9999999999',
+    //     },
+    //     theme: {
+    //       color: "#007AFF"
+    //     },
+    //   };
+    //   RazorpayCheckout.open(options)
+    //   .then((data:any) => {
+    //     buyNow(data)
+    //     // handle success here
+    //   })
+    //   .catch((error:any) => {
+    //     // handle failure here
+    //     console.log(`Payment error: ${error.code} | ${error.description}`);
+    //   });
+    // }
   };
   
 
@@ -239,8 +292,26 @@ export default function HomeScreen() {
           <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} textColor={'black'} themeColor={'white'} />
           <View style={{alignItems: 'center'}}>
             {/* <Button title="Buy Now" color="blue" onPress={() => buyNow()} /> */}
-            <Button title="Buy Now" color="blue" onPress={() => paymentInitiate()} />
-            <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} />
+            {/* <Button title="Buy Now" color="blue" onPress={() => paymentInitiate()} /> */}
+            <TouchableOpacity style={styles.buyButton} onPress={() => paymentInitiate()} activeOpacity={0.8}>
+              <Text style={styles.buyButtonText}>Buy Now</Text>
+            </TouchableOpacity>
+            {/* <Button title="Cancel" color="red" onPress={() => setIsModalOpen(false)} /> */}
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setIsModalOpen(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <RazorpayWebView
+              isVisible={isRzpModalVisible}
+              onClose={onRzpPaymentComplete}
+              paymentUrl={'https://rzp.io/rzp/vmQRmJY'}
+              // {paymentUrl}
+            />
+
           </View>
         </View>
         <AddAddressForm isAddressModalOpen={isAddressModalOpen} setIsAddressModalOpen={setIsAddressModalOpen} fetchProfileData={fetchProfileData} />
@@ -280,7 +351,10 @@ export default function HomeScreen() {
                         <ThemedText style={styles.cardText}>Available quantity: {availableProduct.deliverable_quantity}</ThemedText>
                         <ThemedText style={styles.cardText}>Payment Status: {availableProduct?.Payment?.paymentStatus}</ThemedText>
                         {availableProduct?.Payment?.paymentStatus !== 'completed' && (
-                          <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct)} />
+                          // <Button style={styles.buyButton} title="Buy Now" onPress={() => checkAddress(availableProduct)} />
+                          <TouchableOpacity style={styles.buyButton} onPress={() => checkAddress(availableProduct)} activeOpacity={0.8}>
+                            <Text style={styles.buyButtonText}>Buy Now</Text>
+                          </TouchableOpacity>
                         )}
                       </View>
                     ))
@@ -456,5 +530,35 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginVertical: 6,
 
-  }
+  },
+  buyButton: {
+    backgroundColor: '#007AFF',  // blue themed button
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8, // optional spacing
+    alignSelf: 'flex-start',  // or 'center' as you prefer
+  },
+  buyButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#FF3B30',  // Red color for cancel
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start', // Or 'center' depending on your layout
+    marginTop: 8, // optional spacing
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },  
 })

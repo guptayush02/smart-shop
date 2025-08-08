@@ -100,10 +100,42 @@ const OrderController = {
         receipt: 'receipt#1',
         payment_capture: 1,
       });
-      return res.status(200).send({ status: 200, data: order });
+
+      const paymentLinkPayload = {
+        amount: price * 100,          // amount in paise
+        currency: 'INR',
+        accept_partial: false,        // whether partial payments are allowed
+        first_min_partial_amount: 0,  // minimum amount if partial payment
+        description: 'Payment for application order',
+        notify: {
+          sms: true,
+          email: true,
+        },
+        reminder_enable: true,
+        callback_url: 'http://192.168.1.13:3000/api/v1/user/payment-callback', // your payment success URL
+        callback_method: 'get',
+        notes: {
+          receipt: 'receipt#1',       // or any unique identifier from your side
+        },
+      };
+  
+      // Create Payment Link
+      const paymentLink = await razorpay.paymentLink.create(paymentLinkPayload);
+      return res.status(200).send({ status: 200, data: {...order, paymentLink} });
     } catch (error) {
       console.log("error in paymentInitiate function:", error)
       return res.status(400).send({status: 400, error: `error in paymentInitiate function ${error}`});
+    }
+  },
+
+  async paymentCallback(req, res) {
+    try {
+      console.log("req:", req.query)
+      return res.status(200).send({ status: 200, data: req.query });
+    } catch (error) {
+      console.log("error in paymentCallback function:", error)
+      return res.status(400).send({status: 400, error: `error in paymentCallback function ${error}`});
+    
     }
   }
 }
