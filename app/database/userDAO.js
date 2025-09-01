@@ -10,6 +10,10 @@ const userDao = {
 
   async create(params, options = {}) {
     return await User.create(params, options);
+  },
+
+  async update(options, where) {
+    return await User.update(options, { where: where });
   }
 }
 
