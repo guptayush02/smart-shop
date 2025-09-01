@@ -12,4 +12,6 @@ router.put("/profile/:id", middleware.authenticate, AuthController.updateProfile
 
 router.post("/add-address", middleware.authenticate, AuthController.saveAddress);
 
+router.put("/update-user", middleware.authenticate, AuthController.updateUser);
+
 module.exports = router

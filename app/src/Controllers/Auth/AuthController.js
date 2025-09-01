@@ -100,6 +100,19 @@ const AuthController = {
       console.log("error in user updateProfile function:", error)
       return res.status(400).send({ status: 400, error: `Error in user updateProfile function: ${error}` })
     }
+  },
+
+  async updateUser(req, res) {
+    try {
+      const { user } = req;
+      const { deviceToken } = req.body;
+      const where = { id: user.id };
+      await userDao.update({ deviceToken }, where);
+      return res.status(200).send({ status: 200, message: 'Address update successfully' });
+    } catch (error) {
+      console.log("error in user updateUser function:", error)
+      return res.status(400).send({ status: 400, error: `Error in user updateUser function: ${error}` })
+    }
   }
 }
 

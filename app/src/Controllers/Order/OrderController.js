@@ -112,7 +112,7 @@ const OrderController = {
           email: true,
         },
         reminder_enable: true,
-        callback_url: 'http://192.168.1.13:3000/api/v1/user/payment-callback', // your payment success URL
+        callback_url: 'http://192.168.1.35:3000/api/v1/user/payment-callback', // your payment success URL
         callback_method: 'get',
         notes: {
           receipt: 'receipt#1',       // or any unique identifier from your side
