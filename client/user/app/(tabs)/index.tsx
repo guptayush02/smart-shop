@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity, Animated, Keyboard } from 'react-native';
+import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity, Animated, Keyboard, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Headers } from '@/components/Headers';
-import { getToken } from '@/helpers/expoSecureStore';
+import { getData, saveData } from '@/helpers/expoSecureStore';
 import LoginForm from '@/components/LoginForm';
 import httpRequest from '@/helpers/httpRequests';
 import SignupForm from '@/components/SignupForm';
@@ -15,11 +15,22 @@ import CustomModal from '@/components/CustomModal';
 import AddAddressForm from '@/components/AddAddressForm';
 import AnimatedInputBox from '@/components/AnimatedInputBox';
 import RazorpayWebView from '@/components/RazorpayWebView';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 // import RazorpayCheckout from 'react-native-razorpay';
 
 const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
   const [isLogin, setIsLogin] = useState(false);
   const [message, setMessage] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -35,7 +46,56 @@ export default function HomeScreen() {
   const [isRzpModalVisible, setRzpModalVisible] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState('');
 
+  const [expoPushToken, setExpoPushToken] = useState('');
+
   const keyboardHeight = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isLogin) {
+      registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    }
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    try {
+      const deviceToken = await getData('deviceToken');
+      if (deviceToken) {
+        return;
+      }
+      let token;
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        console.log("finalStatus:", finalStatus)
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+          Alert.alert('Failed to get push token for push notifications!');
+          return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log('Expo Push Token:', token);
+      } else {
+        Alert.alert('Must use physical device for Push Notifications');
+      }
+
+      if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      }
+
+      // *** Send this token to your backend to save ***
+      await httpRequest.put('api/v1/auth/update-user', { deviceToken: token });
+      saveData('deviceToken', token);
+      return token;
+    } catch (error) {
+      console.log("error:", error)
+    }
+  }
 
   useEffect(() => {
     const keyboardWillShow = (e:any) => {
@@ -69,7 +129,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       const checkToken = async() => {
-        const token = await getToken('token');
+        const token = await getData('token');
         if (token) {
           setIsLogin(true)
         } else {
@@ -87,6 +147,7 @@ export default function HomeScreen() {
 
       if (isLogin) {
         getQuery();
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
       } else {
         setPreviousQuery([]);
       }
@@ -94,7 +155,7 @@ export default function HomeScreen() {
   )
 
   const handleSend = async () => {
-    const token = await getToken('token');
+    const token = await getData('token');
     if (!token) {
       setShowLoginModal(true);
     } else {
@@ -153,11 +214,15 @@ export default function HomeScreen() {
     }
   }
 
-  const onRzpPaymentComplete = (success: boolean) => {
+  const onRzpPaymentComplete = (success: any) => {
     setRzpModalVisible(false);
     console.log("success:", success)
     if (success) {
-      // buyNow()
+      const payload = {
+        razorpay_payment_id: success?.data?.razorpay_payment_id,
+        razorpay_order_id: success?.data?.razorpay_order_id
+      }
+      buyNow(payload)
       // Handle successful order placement here
       // Maybe refresh queries or fetch orders again
       alert('Payment Successful!');
@@ -227,7 +292,7 @@ export default function HomeScreen() {
 
   const buyNow = async(paymentDetails: any) => {
     const id = availableProductId;
-    const token = await getToken('token');
+    const token = await getData('token');
     if (!token) {
       setShowLoginModal(true);
     } else {
@@ -308,7 +373,7 @@ export default function HomeScreen() {
             <RazorpayWebView
               isVisible={isRzpModalVisible}
               onClose={onRzpPaymentComplete}
-              paymentUrl={'https://rzp.io/rzp/vmQRmJY'}
+              paymentUrl={paymentUrl}
               // {paymentUrl}
             />
 

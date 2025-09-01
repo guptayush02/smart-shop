@@ -13,6 +13,7 @@ import httpRequest from '@/helpers/httpRequests';
 import AddAddressForm from '@/components/AddressForm';
 import Addresses from '@/components/Addresses';
 import { CategoriesDropdown } from '@/components/CategoryDropdown';
+import { removeData } from '@/helpers/expoSecureStore';
 
 export default function TabTwoScreen() {
   const [isLogin, setIsLogin] = useState(false);
@@ -42,16 +43,22 @@ export default function TabTwoScreen() {
     if (isLogin) {
       const response: any = await httpRequest.get('api/v1/auth/profile');
       if (response.data.status === 200) {
+        console.log("response:", response.data.data)
         setUser(response.data.data);
       }
     }
   };
 
+  const logout = async() => {
+    await removeData('token');
+    setIsLogin(false);
+  }
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
-        <Headers isLogin={isLogin} setIsLogin={setIsLogin} />
+        <Headers isLogin={isLogin} setIsLogin={setIsLogin} user={user} />
       }>
         <AddAddressForm isAddressModalOpen={isAddressModalOpen} setIsAddressModalOpen={setIsAddressModalOpen} fetchProfileData={fetchProfileData} />
         <ThemedView style={styles.titleContainer}>
@@ -63,10 +70,6 @@ export default function TabTwoScreen() {
               <View>
                 <ThemedText>{user?.name}</ThemedText>
                 <ThemedText>{user?.email}</ThemedText>
-              </View>
-              <View style={{ position: 'relative', zIndex: 999, gap: 8 }}>
-                <ThemedText type="title">Category</ThemedText>
-                <CategoriesDropdown isLogin={isLogin} getQuery={() => {}} />
               </View>
               <Addresses setIsAddressModalOpen={setIsAddressModalOpen} user={user} fetchProfileData={fetchProfileData} />
 
@@ -98,6 +101,9 @@ export default function TabTwoScreen() {
                   </View>
                 </ScrollView>
               </ThemedView>
+              <TouchableOpacity onPress={logout} style={styles.logoutButton} activeOpacity={0.7}>
+                <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+              </TouchableOpacity>
             </ThemedView>
           ) : (
             <ThemedText>You are not login</ThemedText>
@@ -147,6 +153,21 @@ const styles = StyleSheet.create({
     padding: 10,
     minWidth: 200,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  logoutButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    alignSelf: 'center',
+    marginTop: 20,
+    minWidth: 140,
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 18,
     textAlign: 'center',
   },
 });

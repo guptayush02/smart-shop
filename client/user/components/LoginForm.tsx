@@ -12,7 +12,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { ThemedText } from './ThemedText';
-import { saveToken } from '@/helpers/expoSecureStore';
+import { saveData } from '@/helpers/expoSecureStore';
 import httpRequest from '@/helpers/httpRequests';
 
 export default function LoginForm({
@@ -33,7 +33,7 @@ export default function LoginForm({
       });
       if (response.data.status === 200) {
         const { data } = response.data;
-        await saveToken('token', data.token);
+        await saveData('token', data.token);
         setShowLoginModal(false);
         setIsLogin(true);
         setEmail('');

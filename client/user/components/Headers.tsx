@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { getToken, removeToken } from '@/helpers/expoSecureStore';
+import { getData, removeData } from '@/helpers/expoSecureStore';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
@@ -13,7 +13,7 @@ export function Headers({ isLogin, setIsLogin, user }:any) {
 
   useEffect(() => {
     const checkToken = async() => {
-      const token = await getToken('token');
+      const token = await getData('token');
       if (token) {
         setIsLogin(true)
       } else {
@@ -24,13 +24,14 @@ export function Headers({ isLogin, setIsLogin, user }:any) {
   }, [isLogin])
 
   const loginLogout = async() => {
-    const token = await getToken('token');
+
+    const token = await getData('token');
     if (!token) {
       setShowLoginModal(true);
       setIsLogin(false)
     }
     // else {
-    //   await removeToken('token')
+    //   await removeData('token')
     //   setIsLogin(false)
     // }
   }

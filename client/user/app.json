@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "my-universal-app",
-    "slug": "my-universal-app",
+    "slug": "smart-shop",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -38,6 +38,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "742a3ba4-977c-4622-899a-a22bea5f0af5"
+      }
+    },
+    "owner": "ayushgupta02"
   }
 }

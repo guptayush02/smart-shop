@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, TouchableOpacity, Text, CheckBox } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -11,6 +11,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Headers } from '@/components/Headers';
 import httpRequest from '@/helpers/httpRequests';
 import AddAddressForm from '@/components/AddAddressForm';
+import Checkbox from 'expo-checkbox';
 
 export default function Addresses({ setIsAddressModalOpen, user, fetchProfileData, textColor = 'white', themeColor = 'transparent' }:any) {
 
@@ -30,7 +31,7 @@ export default function Addresses({ setIsAddressModalOpen, user, fetchProfileDat
       {
         user?.Profiles?.map((profile: any, ind:number) => (
           <View key={ind} style={styles.addresses}>
-            <CheckBox
+            <Checkbox
               value={profile.defaultAddress}
               onValueChange={(event:any) => onChangeDefaultAddress(event, profile)}
               style={styles.checkbox}

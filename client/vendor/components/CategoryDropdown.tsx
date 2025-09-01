@@ -194,7 +194,7 @@ export function CategoriesDropdown({ isLogin, getQuery }: any) {
             <View style={styles.dropdown}>
               <FlatList
                 data={categoryList}
-                keyExtractor={(item, idx) => item + idx}
+                keyExtractor={(item:any, idx:any) => item + idx}
                 renderItem={renderItem}
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getData } from './expoSecureStore';
 
-const baseUrl = 'http://192.168.1.13:3000/'
+const baseUrl = 'http://192.168.1.35:3000/'
 
 const httpRequest = {
   post: async(route: string, body:{}) => {

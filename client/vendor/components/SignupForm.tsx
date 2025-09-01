@@ -1,4 +1,4 @@
-// import { saveToken } from '@/helpers/expoSecureStore';
+// import { saveData } from '@/helpers/expoSecureStore';
 // import React, { useState } from 'react';
 // import { Modal, View, Text, Button, Platform, StyleSheet, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 // import httpRequest from '@/helpers/httpRequests';
@@ -124,7 +124,7 @@ import {
 } from 'react-native';
 import { ThemedText } from './ThemedText';
 import httpRequest from '@/helpers/httpRequests';
-import { saveToken } from '@/helpers/expoSecureStore';
+import { saveData } from '@/helpers/expoSecureStore';
 
 const COLORS = {
   primary: '#007AFF',

@@ -12,7 +12,7 @@ import { Headers } from '@/components/Headers';
 import httpRequest from '@/helpers/httpRequests';
 import AddAddressForm from '@/components/AddAddressForm';
 import Addresses from '@/components/Addresses';
-import { getToken, removeToken } from '@/helpers/expoSecureStore';
+import { getData, removeData } from '@/helpers/expoSecureStore';
 
 export default function TabTwoScreen() {
   const [isLogin, setIsLogin] = useState(false);
@@ -23,7 +23,7 @@ export default function TabTwoScreen() {
     useCallback(() => {
       fetchProfileData();
       const checkToken = async() => {
-        const token = await getToken('token');
+        const token = await getData('token');
         if (token) {
           setIsLogin(true)
         } else {
@@ -36,7 +36,7 @@ export default function TabTwoScreen() {
 
   const fetchProfileData = async () => {
     console.log("fetchProfileData:")
-    console.log("isLofin:", isLogin);
+    console.log("isLogin:", isLogin);
     if (isLogin) {
       const response: any = await httpRequest.get('api/v1/auth/profile');
       if (response.data.status === 200) {
@@ -46,7 +46,8 @@ export default function TabTwoScreen() {
   };
 
   const logout = async() => {
-    await removeToken('token');
+    await removeData('token');
+    await removeData('deviceToken');
     setIsLogin(false);
   }
 
